@@ -163,13 +163,17 @@ int main (void)
 
         if (SENSOR_STATE != sensor_prev_state)
         {
-            sensor_prev_state = SENSOR_STATE;
-            if (SENSOR_STATE)
+            _delay_ms(70);
+            if (SENSOR_STATE != sensor_prev_state)
             {
-                switch (display_state)
+                sensor_prev_state = SENSOR_STATE;
+                if (SENSOR_STATE)
                 {
-                    case SHOW_TIME: display_state = SHOW_TEMP; break;
-                    case SHOW_TEMP: display_state = SHOW_TIME; break;
+                    switch (display_state)
+                    {
+                        case SHOW_TIME: display_state = SHOW_TEMP; break;
+                        case SHOW_TEMP: display_state = SHOW_TIME; break;
+                    }
                 }
             }
         }
