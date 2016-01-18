@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/baranovskiykonstantin/common/projects/aquarium/aquarium.sch)
-    (date "Mon 18 Jan 2016 02:25:40 PM EET")
+    (date "Mon 18 Jan 2016 03:47:22 PM EET")
     (tool "Eeschema (2015-12-27 BZR 5198)-new_icons")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -16,9 +16,9 @@
         (comment (number 4) (value "")))))
   (components
     (comp (ref DD4)
-      (value ATMEGA48PA)
+      (value ATMEGA8A)
       (footprint Микросхемы:TQFP32-30)
-      (libsource (lib Микроконтроллеры) (part ATMEGA48PA_EXT))
+      (libsource (lib Микроконтроллеры) (part ATMEGA8_EXT))
       (sheetpath (names /) (tstamps /))
       (tstamp 5677FF09))
     (comp (ref HG1)
@@ -465,12 +465,12 @@
         (pin (num 1) (name 1) (type passive))
         (pin (num 2) (name 2) (type passive)))))
   (libraries
+    (library (logical Индикаторы)
+      (uri /home/baranovskiykonstantin/common/kicad/symbols/Индикаторы.lib))
     (library (logical Датчики)
       (uri /home/baranovskiykonstantin/common/kicad/symbols/Датчики.lib))
     (library (logical Конденсаторы)
       (uri /home/baranovskiykonstantin/common/kicad/symbols/Конденсаторы.lib))
-    (library (logical Индикаторы)
-      (uri /home/baranovskiykonstantin/common/kicad/symbols/Индикаторы.lib))
     (library (logical Микроконтроллеры)
       (uri /home/baranovskiykonstantin/common/kicad/symbols/Микроконтроллеры.lib))
     (library (logical Оптопары)
