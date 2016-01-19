@@ -1,5 +1,5 @@
 # aquarium
-Контроллер для аквариума
+Контроллер для аквариума.
 
 ## Описание
 Контроллер предназначен для управления освещением и температурой воды аквариума.
@@ -15,8 +15,8 @@
 ![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-schematic.png)
 
 ## Печатная плата
-![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-top.png)
-![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-bottom.png)
+![pcb-top](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-top.png)
+![pcb-bottom](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-bottom.png)
 
 ## Настройка
 Настройка параметров работы выполняется через интерфейс UART (разъем XT5).<br>
