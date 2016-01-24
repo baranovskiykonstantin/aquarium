@@ -20,9 +20,15 @@
 #include "ds1302.h"
 #include "uart.h"
 
+/*
+ * Modes of the display
+ */
 #define SHOW_TIME 0x01
 #define SHOW_TEMP 0x10
 
+/*
+ * Addresses of the parameters in EEPROM
+ */
 #define EE_ADDR_TEMP_L (uint8_t *)0
 #define EE_ADDR_TEMP_H (uint8_t *)1
 
@@ -34,6 +40,9 @@
 #define EE_ADDR_TIME_OFF_MIN (uint8_t *)6
 #define EE_ADDR_TIME_OFF_HOUR (uint8_t *)7
 
+/*
+ * I/O configuration
+ */
 #define HEAT_AS_OUT DDRC |= (1 << PC5)
 #define HEAT_ON PORTC |= (1 << PC5)
 #define HEAT_OFF PORTC &= ~(1 << PC5)
@@ -49,6 +58,9 @@
 #define SENSOR_PULLUP_DISABLE PORTD &= ~(1 << PD4)
 #define SENSOR_STATE (PIND & (1 << PD4)) >> PD4
 
+/*
+ * Buffer for storing data received from UART
+ */
 uint8_t uart_str[UART_RX_BUFFER_SIZE];
 
 /* ---------------------- Send int to UART as ASCII ------------------------ */
