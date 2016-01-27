@@ -21,12 +21,6 @@
 #include "uart.h"
 
 /*
- * Modes of the display
- */
-#define SHOW_TIME 0x01
-#define SHOW_TEMP 0x10
-
-/*
  * Addresses of the parameters in EEPROM
  */
 #define EE_ADDR_TEMP_L (uint8_t *)0
@@ -58,10 +52,20 @@
 #define SENSOR_PULLUP_DISABLE PORTD &= ~(1 << PD4)
 #define SENSOR_STATE (PIND & (1 << PD4)) >> PD4
 
+#define SENSOR_PWR_AS_OUT DDRD |= (1 << PD2)
+#define SENSOR_PWR_ON PORTD |= (1 << PD2)
+#define SENSOR_PWR_OFF PORTD &= ~(1 << PD2)
+#define SENSOR_PWR_STATE (PIND & (1 << PD2)) >> PD2
+
 /*
  * Buffer for storing data received from UART
  */
 uint8_t uart_str[UART_RX_BUFFER_SIZE];
+
+/*
+ * Modes of the display
+ */
+enum { SHOW_TIME, SHOW_TEMP };
 
 /* ---------------------- Send int to UART as ASCII ------------------------ */
 void uart_puti (int8_t value)
@@ -108,6 +112,15 @@ void uart_ok (void)
     uart_puts("OK\r\n");
 }
 
+/* --------------------- Capacity sensor calibration ----------------------- */
+void sensor_recalibration (void)
+{
+    SENSOR_PWR_OFF;
+    _delay_ms(10);
+    SENSOR_PWR_ON;
+    _delay_ms(100);
+}
+
 /* =============== Main function - start point of the program ============== */
 int main (void)
 {
@@ -124,6 +137,9 @@ int main (void)
     time_t time_on, time_off;
     uint8_t uart_str_indx = 0;
 
+    /*
+     * Restoring settings from EEPROM
+     */
     temp_l = eeprom_read_byte(EE_ADDR_TEMP_L);
     temp_h = eeprom_read_byte(EE_ADDR_TEMP_H);
 
@@ -139,9 +155,12 @@ int main (void)
     time_off.AMPM = AM;
     time_off.H12_24 = H24;
 
-    // Initialize I/O
+    /*
+     * Initialize I/O
+     */
     LIGHT_AS_OUT;
     HEAT_AS_OUT;
+    SENSOR_PWR_AS_OUT;
 
     display_init();                 // Initialize the display
     ds1302_init();                  // Initialize the RTC
@@ -149,9 +168,28 @@ int main (void)
 
     sei();                          // Enable all interrupts
 
+    sensor_recalibration();
+
     while (1)
     {
         current_datetime = ds1302_read_datetime();
+
+        time_sec = current_datetime.hour * 3600L + current_datetime.min * 60L + current_datetime.sec;
+        time_sec_on = time_on.hour * 3600L + time_on.min * 60L + time_on.sec;
+        time_sec_off = time_off.hour * 3600L + time_off.min * 60L + time_off.sec;
+
+        if (time_sec >= time_sec_on && time_sec <= time_sec_off)
+        {
+            if (!(LIGHT_STATE))
+                LIGHT_ON;
+                sensor_recalibration();
+        }
+        else if (LIGHT_STATE)
+        {
+            LIGHT_OFF;
+            sensor_recalibration();
+        }
+
         temp_tmp = ds18b20_gettemp();
         if (temp_tmp == DS18B20_ERR)
         {
@@ -173,19 +211,34 @@ int main (void)
             temp_fail_counter = 0;
         }
 
+        if (temp_value == DS18B20_ERR)
+        {
+            HEAT_OFF;
+            sensor_recalibration();
+        }
+        else
+        {
+            if ((temp_int < temp_l) && !(HEAT_STATE))
+            {
+                HEAT_ON;
+                sensor_recalibration();
+            }
+            if ((temp_int > temp_h) && (HEAT_STATE))
+            {
+                HEAT_OFF;
+                sensor_recalibration();
+            }
+        }
+
         if (SENSOR_STATE != sensor_prev_state)
         {
-            _delay_ms(70);
-            if (SENSOR_STATE != sensor_prev_state)
+            sensor_prev_state = SENSOR_STATE;
+            if (SENSOR_STATE)
             {
-                sensor_prev_state = SENSOR_STATE;
-                if (SENSOR_STATE)
+                switch (display_state)
                 {
-                    switch (display_state)
-                    {
-                        case SHOW_TIME: display_state = SHOW_TEMP; break;
-                        case SHOW_TEMP: display_state = SHOW_TIME; break;
-                    }
+                    case SHOW_TIME: display_state = SHOW_TEMP; break;
+                    case SHOW_TEMP: display_state = SHOW_TIME; break;
                 }
             }
         }
@@ -196,32 +249,7 @@ int main (void)
             case SHOW_TEMP: display_temp(temp_value); break;
         }
 
-        if (temp_value == DS18B20_ERR)
-        {
-            HEAT_OFF;
-        }
-        else
-        {
-            if ((temp_int < temp_l) && !(HEAT_STATE))
-                HEAT_ON;
-            if ((temp_int > temp_h) && (HEAT_STATE))
-                HEAT_OFF;
-        }
-
-        time_sec = current_datetime.hour * 3600L + current_datetime.min * 60L + current_datetime.sec;
-        time_sec_on = time_on.hour * 3600L + time_on.min * 60L + time_on.sec;
-        time_sec_off = time_off.hour * 3600L + time_off.min * 60L + time_off.sec;
-        if (time_sec >= time_sec_on && time_sec <= time_sec_off)
-        {
-            if (!(LIGHT_STATE))
-                LIGHT_ON;
-        }
-        else if (LIGHT_STATE)
-        {
-            LIGHT_OFF;
-        }
-
-        uart_chr = uart_getc();
+        uart_chr = uart_getc(); // Catch first char from UART
         while ((uart_chr & 0xff00) == 0)
         {
             uart_str[uart_str_indx++] = (uart_chr & 0xff);
@@ -403,9 +431,8 @@ int main (void)
                 }
                 uart_str_indx = 0;
             }
-            uart_chr = uart_getc();
+            uart_chr = uart_getc(); // Get next char from UART
         }
-        _delay_ms(100);
     }
     return 0;
 }
