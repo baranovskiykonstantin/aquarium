@@ -1,4 +1,4 @@
-(kicad_pcb (version 4) (host pcbnew "(2015-12-27 BZR 5198)-new_icons")
+(kicad_pcb (version 4) (host pcbnew "(2016-01-20 BZR 5201)-new_icons")
 
   (general
     (links 93)
@@ -6,7 +6,7 @@
     (area 92.924999 82.924999 197.075001 130.075001)
     (thickness 1.6)
     (drawings 50)
-    (tracks 297)
+    (tracks 302)
     (zones 0)
     (modules 40)
     (nets 49)
@@ -37,7 +37,7 @@
   )
 
   (setup
-    (last_trace_width 0.25)
+    (last_trace_width 0.5)
     (user_trace_width 0.2)
     (user_trace_width 0.3)
     (user_trace_width 0.4)
@@ -411,7 +411,7 @@
     (fp_text reference C2 (at 0 -2 90) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text value 0.01 (at 0 0 90) (layer F.SilkS) hide
+    (fp_text value 2n2 (at 0 0 90) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_line (start 0.762 -1.016) (end 1.905 -1.016) (layer F.SilkS) (width 0.254))
@@ -449,12 +449,12 @@
       (net 1 GND))
   )
 
-  (module Конденсаторы:SMD_0805 (layer F.Cu) (tedit 567D1CD1) (tstamp 567D11A1)
-    (at 112.25 116.5)
+  (module Конденсаторы:SMD_0805 (layer F.Cu) (tedit 56B4BC3C) (tstamp 567D11A1)
+    (at 101.727 93.726)
     (descr "Capacitor smd 0805")
     (tags C)
     (path /5679197E)
-    (fp_text reference C4 (at -3 0) (layer F.SilkS)
+    (fp_text reference C4 (at 0 -1.905) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value 0.1 (at 0 0) (layer F.SilkS) hide
@@ -467,7 +467,7 @@
     (fp_line (start -1.905 1.016) (end -1.905 -1.016) (layer F.SilkS) (width 0.254))
     (fp_line (start -1.905 1.016) (end -0.762 1.016) (layer F.SilkS) (width 0.254))
     (pad 1 smd rect (at 1.016 0) (size 1.27 1.524) (layers F.Cu F.Paste F.Mask)
-      (net 2 +5B))
+      (net 30 /~RESET))
     (pad 2 smd rect (at -1.016 0) (size 1.27 1.524) (layers F.Cu F.Paste F.Mask)
       (net 1 GND))
   )
@@ -1117,7 +1117,7 @@
     (fp_text reference R1 (at 3 0 180) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text value 22k (at 0 0 180) (layer F.SilkS) hide
+    (fp_text value 100k (at 0 0 180) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_line (start 0.762 -1.016) (end 1.905 -1.016) (layer F.SilkS) (width 0.254))
@@ -1715,6 +1715,8 @@
   (segment (start 88 83) (end 93 83) (width 0.2) (layer F.Cu) (net 0))
   (segment (start 197 83) (end 197 78) (width 0.2) (layer F.Cu) (net 0))
   (segment (start 197 83) (end 202 83) (width 0.2) (layer F.Cu) (net 0))
+  (segment (start 100.711 93.726) (end 98.254 93.726) (width 0.5) (layer F.Cu) (net 1) (status C00000))
+  (segment (start 98.254 93.726) (end 98.25 93.73) (width 0.3) (layer F.Cu) (net 1) (tstamp 56B4BC85) (status C00000))
   (segment (start 104.5 112.75) (end 104.5 114.884) (width 0.5) (layer F.Cu) (net 1))
   (segment (start 104.5 114.884) (end 105.2 115.584) (width 0.5) (layer F.Cu) (net 1) (tstamp 567FE871))
   (segment (start 96.5 106) (end 97 106) (width 0.5) (layer F.Cu) (net 1))
@@ -1791,7 +1793,6 @@
   (segment (start 114.81 127.06) (end 113.266 125.516) (width 0.5) (layer F.Cu) (net 2) (tstamp 567E9A90))
   (segment (start 113.266 114) (end 113.266 116.5) (width 0.5) (layer F.Cu) (net 2) (status 30))
   (segment (start 108.25 125.516) (end 113.266 125.516) (width 0.5) (layer F.Cu) (net 2) (status 10))
-  (segment (start 113.266 125.516) (end 113.266 116.5) (width 0.5) (layer F.Cu) (net 2) (tstamp 567D6CD9) (status 20))
   (segment (start 113.25 110.8) (end 113.25 113.984) (width 0.3) (layer F.Cu) (net 2) (status 30))
   (segment (start 113.25 113.984) (end 113.266 114) (width 0.3) (layer F.Cu) (net 2) (tstamp 567D6C7D) (status 30))
   (segment (start 98.25 114.96) (end 101.46 114.96) (width 0.5) (layer F.Cu) (net 2) (status 30))
@@ -1811,6 +1812,7 @@
   (segment (start 114.05 102.3) (end 114.05 104.15) (width 0.3) (layer F.Cu) (net 2) (status 10))
   (segment (start 114 99.868) (end 113.882 99.75) (width 0.3) (layer F.Cu) (net 2) (status 30))
   (segment (start 98.25 101.31) (end 98.81 101.31) (width 0.5) (layer F.Cu) (net 2) (status 30))
+  (segment (start 113.266 125.516) (end 113.266 116.5) (width 0.5) (layer F.Cu) (net 2) (tstamp 567D6CD9) (status 20))
   (segment (start 151.35 116.66) (end 151.35 112.05) (width 0.3) (layer F.Cu) (net 3) (status 30))
   (segment (start 151.35 112.05) (end 151.4 112) (width 0.3) (layer F.Cu) (net 3) (tstamp 567D628D) (status 30))
   (segment (start 143.73 116.66) (end 143.73 112.13) (width 0.3) (layer F.Cu) (net 4) (status 30))
@@ -1911,6 +1913,9 @@
   (segment (start 134.98 121.98) (end 129.25 116.25) (width 0.3) (layer F.Cu) (net 29) (tstamp 567E9A9F))
   (segment (start 120.3 116.25) (end 114.85 110.8) (width 0.3) (layer F.Cu) (net 29) (tstamp 567E9ABB))
   (segment (start 129.25 116.25) (end 120.3 116.25) (width 0.3) (layer F.Cu) (net 29) (tstamp 567E9AB3))
+  (segment (start 103.25 95.75) (end 103.25 94.233) (width 0.3) (layer F.Cu) (net 30) (status 800000))
+  (segment (start 103.25 94.233) (end 102.743 93.726) (width 0.3) (layer F.Cu) (net 30) (tstamp 56B4BC53) (status 800000))
+  (segment (start 102.743 93.726) (end 105.274 93.726) (width 0.3) (layer F.Cu) (net 30) (tstamp 56B4BC56) (status 400000))
   (segment (start 107.8 106.95) (end 104.95 106.95) (width 0.3) (layer F.Cu) (net 30) (status 10))
   (segment (start 160.77 94.75) (end 159.79 95.73) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2195) (status 20))
   (segment (start 167.25 94.75) (end 160.77 94.75) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E218F))
@@ -1918,7 +1923,7 @@
   (segment (start 168 90.5) (end 168 94) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2187))
   (segment (start 165.25 87.75) (end 168 90.5) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2173))
   (segment (start 111.25 87.75) (end 165.25 87.75) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2166))
-  (segment (start 103.25 95.75) (end 111.25 87.75) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2157))
+  (segment (start 105.274 93.726) (end 111.25 87.75) (width 0.3) (layer F.Cu) (net 30) (tstamp 56B4BC5F))
   (segment (start 103.25 105.25) (end 103.25 95.75) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E2154))
   (segment (start 104.95 106.95) (end 103.25 105.25) (width 0.3) (layer F.Cu) (net 30) (tstamp 567E214E))
   (segment (start 116.3 105.35) (end 144.35 105.35) (width 0.3) (layer F.Cu) (net 31) (status 10))

@@ -3,7 +3,7 @@
   (general
     (links 93)
     (no_connects 2)
-    (area 74.899999 67.875 220.208334 135.300002)
+    (area 92.924999 82.924999 197.075001 130.075001)
     (thickness 1.6)
     (drawings 50)
     (tracks 297)
@@ -636,7 +636,7 @@
     (fp_text reference DD4 (at 0 6.2 90) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text value ATMEGA48PA (at 0 0 90) (layer F.SilkS) hide
+    (fp_text value ATMEGA8A (at 0 0 90) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_circle (center -2.25 -2.25) (end -2 -2) (layer F.SilkS) (width 0.15))

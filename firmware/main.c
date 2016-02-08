@@ -21,12 +21,6 @@
 #include "uart.h"
 
 /*
- * Modes of the display
- */
-#define SHOW_TIME 0x01
-#define SHOW_TEMP 0x10
-
-/*
  * Addresses of the parameters in EEPROM
  */
 #define EE_ADDR_TEMP_L (uint8_t *)0
@@ -57,6 +51,11 @@
 #define SENSOR_PULLUP_ENABLE PORTD |= (1 << PD4)
 #define SENSOR_PULLUP_DISABLE PORTD &= ~(1 << PD4)
 #define SENSOR_STATE (PIND & (1 << PD4)) >> PD4
+
+/*
+ * Modes of the display
+ */
+enum {SHOW_TIME, SHOW_TEMP};
 
 /*
  * Buffer for storing data received from UART
@@ -151,7 +150,25 @@ int main (void)
 
     while (1)
     {
+        // Time
         current_datetime = ds1302_read_datetime();
+
+        // Light
+        time_sec = current_datetime.hour * 3600L + current_datetime.min * 60L + current_datetime.sec;
+        time_sec_on = time_on.hour * 3600L + time_on.min * 60L + time_on.sec;
+        time_sec_off = time_off.hour * 3600L + time_off.min * 60L + time_off.sec;
+
+        if (time_sec >= time_sec_on && time_sec <= time_sec_off)
+        {
+            if (!(LIGHT_STATE))
+                LIGHT_ON;
+        }
+        else if (LIGHT_STATE)
+        {
+            LIGHT_OFF;
+        }
+
+        // Temp
         temp_tmp = ds18b20_gettemp();
         if (temp_tmp == DS18B20_ERR)
         {
@@ -173,29 +190,7 @@ int main (void)
             temp_fail_counter = 0;
         }
 
-        if (SENSOR_STATE != sensor_prev_state)
-        {
-            _delay_ms(70);
-            if (SENSOR_STATE != sensor_prev_state)
-            {
-                sensor_prev_state = SENSOR_STATE;
-                if (SENSOR_STATE)
-                {
-                    switch (display_state)
-                    {
-                        case SHOW_TIME: display_state = SHOW_TEMP; break;
-                        case SHOW_TEMP: display_state = SHOW_TIME; break;
-                    }
-                }
-            }
-        }
-
-        switch (display_state)
-        {
-            case SHOW_TIME: display_time(current_datetime); break;
-            case SHOW_TEMP: display_temp(temp_value); break;
-        }
-
+        // Heat
         if (temp_value == DS18B20_ERR)
         {
             HEAT_OFF;
@@ -208,28 +203,47 @@ int main (void)
                 HEAT_OFF;
         }
 
-        time_sec = current_datetime.hour * 3600L + current_datetime.min * 60L + current_datetime.sec;
-        time_sec_on = time_on.hour * 3600L + time_on.min * 60L + time_on.sec;
-        time_sec_off = time_off.hour * 3600L + time_off.min * 60L + time_off.sec;
-        if (time_sec >= time_sec_on && time_sec <= time_sec_off)
+        // Sensor
+        if (SENSOR_STATE != sensor_prev_state)
         {
-            if (!(LIGHT_STATE))
-                LIGHT_ON;
-        }
-        else if (LIGHT_STATE)
-        {
-            LIGHT_OFF;
+            sensor_prev_state = SENSOR_STATE;
+            if (SENSOR_STATE)
+            {
+                switch (display_state)
+                {
+                    case SHOW_TIME: display_state = SHOW_TEMP; break;
+                    case SHOW_TEMP: display_state = SHOW_TIME; break;
+                }
+            }
         }
 
+        // Display mode
+        switch (display_state)
+        {
+            case SHOW_TIME: display_time(current_datetime); break;
+            case SHOW_TEMP: display_temp(temp_value); break;
+        }
+
+        // UART
         uart_chr = uart_getc();
         while ((uart_chr & 0xff00) == 0)
         {
+            // Put char to buffer
             uart_str[uart_str_indx++] = (uart_chr & 0xff);
             if (uart_str_indx >= UART_RX_BUFFER_SIZE)
             {
                 uart_str_indx = 0;
                 break;
             }
+            // Backspace correction
+            if (uart_str[uart_str_indx - 1] == 0x08)
+            {
+                if (uart_str_indx < 2)
+                    uart_str_indx = 0;
+                else
+                    uart_str_indx -= 2;
+            }
+            // Command processing
             if (uart_str[uart_str_indx - 1] == '\n')
             {
                 if (chr_to_lower(uart_str[0]) == 's' &&
