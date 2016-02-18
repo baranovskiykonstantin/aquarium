@@ -86,7 +86,7 @@ uint8_t uart_str_get_int (uint8_t indx, uint8_t len)
     return value;
 }
 
-/* ----------------------- Convert char case to low ------------------------ */
+/* --------------------- Convert char case to lower ------------------------ */
 uint8_t chr_to_lower (uint8_t chr)
 {
     return (chr | 0x20);
@@ -170,18 +170,9 @@ int main (void)
 
         // Temp
         temp_tmp = ds18b20_gettemp();
-        if (temp_tmp == DS18B20_ERR)
+        if (temp_tmp == DS18B20_ERR && temp_fail_counter < 5)
         {
-            if (temp_fail_counter < 5)
-            {
-                temp_fail_counter += 1;
-            }
-            else
-            {
-                temp_value = temp_tmp;
-                temp_int = lround(temp_value);
-                temp_fail_counter = 0;
-            }
+            temp_fail_counter += 1;
         }
         else
         {
@@ -217,7 +208,7 @@ int main (void)
             }
         }
 
-        // Display mode
+        // Update display
         switch (display_state)
         {
             case SHOW_TIME: display_time(current_datetime); break;
