@@ -13,7 +13,7 @@ FUSE_L  = 0xe4
 FUSE_H  = 0xd7
 AVRDUDE = avrdude -c pickit2 clockrate=50000 -p m8 -v
 
-SOURCES = main.c display.c ds18b20.c ds1302.c uart.c crc8.c
+SOURCES = main.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c
 CFLAGS  = -I. -DDEBUG_LEVEL=0
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 
