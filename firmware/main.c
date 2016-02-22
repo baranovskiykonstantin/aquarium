@@ -76,7 +76,9 @@ enum {AUTO='a', MANUAL='m'};
  */
 uint8_t uart_str[UART_RX_BUFFER_SIZE];
 
-/* ---------------------- Send int to UART as ASCII ------------------------ */
+/* ------------------------------------------------------------------------- *
+ * Send int to UART as ASCII
+ * ------------------------------------------------------------------------- */
 void uart_puti (int8_t value)
 {
     if (value < 0 )
@@ -87,7 +89,9 @@ void uart_puti (int8_t value)
     uart_putc (value % 10 + 0x30);
 }
 
-/* ------------------------- Get int from buffer --------------------------- */
+/* ------------------------------------------------------------------------- *
+ * Get int from buffer
+ * ------------------------------------------------------------------------- */
 uint8_t uart_str_get_int (uint8_t indx, uint8_t len)
 {
     uint8_t i;
@@ -100,19 +104,25 @@ uint8_t uart_str_get_int (uint8_t indx, uint8_t len)
     return value;
 }
 
-/* ------------------------------ UART ok ---------------------------------- */
+/* ------------------------------------------------------------------------- *
+ * Send confirmation of the success to UART
+ * ------------------------------------------------------------------------- */
 void uart_ok (void)
 {
     uart_puts ("OK\r\n");
 }
 
-/* --------------------- Convert char case to lower ------------------------ */
+/* ------------------------------------------------------------------------- *
+ * Convert char case to lower
+ * ------------------------------------------------------------------------- */
 uint8_t chr_to_lower (uint8_t chr)
 {
     return (chr | 0x20);
 }
 
-/* ------------------------ Check if char is digit ------------------------- */
+/* ------------------------------------------------------------------------- *
+ * Check if char is digit
+ * ------------------------------------------------------------------------- */
 uint8_t chr_is_digit (uint8_t chr)
 {
     if (chr >= '0' && chr <= '9')
@@ -121,7 +131,9 @@ uint8_t chr_is_digit (uint8_t chr)
         return 0;
 }
 
-/* -------------------------- Time correction ------------------------------ */
+/* ------------------------------------------------------------------------- *
+ * Time correction
+ * ------------------------------------------------------------------------- */
 void time_correction (datetime_t *datetime, time_t *daily_corr)
 {
     int32_t diff_in_days, i;
@@ -188,7 +200,9 @@ void time_correction (datetime_t *datetime, time_t *daily_corr)
     }
 }
 
-/* =============== Main function - start point of the program ============== */
+/* ========================================================================= *
+ * Main function - start point of the program
+ * ========================================================================= */
 int main (void)
 {
     uint16_t uart_chr;
@@ -199,9 +213,8 @@ int main (void)
     uint8_t display_mode = SHOW_TIME;
 
     datetime_t current_datetime, datetime_tmp;
-    time_t daily_corr;
     uint32_t time_sec, time_sec_on, time_sec_off;
-    time_t time_on, time_off;
+    time_t daily_corr, time_on, time_off;
 
     uint8_t temp_fail_counter = 0;
     double temp_tmp;
@@ -229,8 +242,10 @@ int main (void)
 
     // In AMPM is stored sign of the time correction
     daily_corr.AMPM = eeprom_read_byte (EE_ADDR_TIME_DAILY_CORR_SIGN);
+    daily_corr.hour = 0;
     daily_corr.min = eeprom_read_byte (EE_ADDR_TIME_DAILY_CORR_MIN);
     daily_corr.sec = eeprom_read_byte (EE_ADDR_TIME_DAILY_CORR_SEC);
+    daily_corr.H12_24 = H24;
 
     heat_mode = eeprom_read_byte (EE_ADDR_HEAT_MODE);
     light_mode = eeprom_read_byte (EE_ADDR_LIGHT_MODE);
