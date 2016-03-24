@@ -9,7 +9,7 @@
 
 DEVICE  = atmega8a
 F_CPU   = 8000000
-FUSE_L  = 0xe4
+FUSE_L  = 0x24
 FUSE_H  = 0xd7
 AVRDUDE = avrdude -c pickit2 clockrate=50000 -p m8 -v
 
@@ -20,23 +20,23 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 ################################## ATmega8a ###################################
 #
 # ATmega8A FUSE_L (Fuse low byte):
-# 0xe4 = 1 1 1 0   0 1 0 0
+# 0x24 = 0 0 1 0   0 1 0 0
 #        ^ ^ \ /   \--+--/
-#        | |  |       +------- CKSEL 3..0 (internal RC oscillator 8 MHz)
-#        | |  +--------------- SUT 1..0 (slowly rising power)
-#        | +------------------ BODEN (disabled)
-#        +-------------------- BODLEVEL (disabled)
+#        | |  |       +------- CKSEL 3..0  ( internal RC oscillator 8 MHz )
+#        | |  +--------------- SUT 1..0    ( slowly rising power )
+#        | +------------------ BODEN       ( enabled )
+#        +-------------------- BODLEVEL    ( 4.0V )
 #
 # ATmega8A FUSE_H (Fuse high byte):
 # 0xd7 = 1 1 0 1   0 1 1 1
 #        ^ ^ ^ ^   ^ \ / |
-#        | | | |   |  |  +---- BOOTRST (reset vector)
-#        | | | |   |  +------- BOOTSZ 1..0 (min size)
-#        | | | |   + --------- EESAVE (EEPROM reserved)
-#        | | | +-------------- CKOPT (oscillator options disabled)
-#        | | +---------------- SPIEN (SPI programming enabled)
-#        | +------------------ WDTON (WDT disable)
-#        +-------------------- RSTDISBL (external reset enabled)
+#        | | | |   |  |  +---- BOOTRST     ( reset vector )
+#        | | | |   |  +------- BOOTSZ 1..0 ( min size )
+#        | | | |   + --------- EESAVE      ( EEPROM reserved )
+#        | | | +-------------- CKOPT       ( oscillator options disabled )
+#        | | +---------------- SPIEN       ( SPI programming enabled )
+#        | +------------------ WDTON       ( WDT disable )
+#        +-------------------- RSTDISBL    ( external reset enabled )
 #
 ###############################################################################
 
