@@ -1,4 +1,4 @@
-update=Fri 25 Dec 2015 07:44:18 PM EET
+update=Пт 22 апр 2016 21:26:22
 version=1
 last_client=kicad
 [cvpcb]
@@ -36,17 +36,6 @@ LibName25=Часы
 LibName26=Электродвигатели
 [general]
 version=1
-[schematic_editor]
-version=1
-PageLayoutDescrFile=gost_landscape.kicad_wks
-PlotDirectoryName=
-SubpartIdSeparator=46
-SubpartFirstId=49
-NetFmtName=
-SpiceForceRefPrefix=0
-SpiceUseNetNumbers=0
-LabSize=60
-ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
 PageLayoutDescrFile=/home/baranovskiykonstantin/common/kicad/emply.kicad_wks
@@ -66,3 +55,14 @@ SolderMaskMinWidth=0
 DrawSegmentWidth=0.2
 BoardOutlineThickness=0.15
 ModuleOutlineThickness=0.15
+[schematic_editor]
+version=1
+PageLayoutDescrFile=gost_landscape.kicad_wks
+PlotDirectoryName=
+SubpartIdSeparator=46
+SubpartFirstId=49
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60
+ERC_TestSimilarLabels=1
