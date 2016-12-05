@@ -11,6 +11,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+#include <avr/wdt.h>
 #include <util/delay.h>
 #include <stdlib.h>
 #include <math.h>
@@ -62,6 +63,11 @@
 #define SENSOR_STATE (PIND & (1 << PD4)) >> PD4
 
 /*
+ * Boolen
+ */
+enum {false, true};
+
+/*
  * Modes of the display
  */
 enum {SHOW_TIME=1, SHOW_TEMP=2};
@@ -105,11 +111,18 @@ uint8_t uart_str_get_int (uint8_t indx, uint8_t len)
 }
 
 /* ------------------------------------------------------------------------- *
- * Send confirmation of the success to UART
+ * Send confirmation of the success or error message to UART
  * ------------------------------------------------------------------------- */
-void uart_ok (void)
+void uart_ok (char success)
 {
-    uart_puts ("OK\r\n");
+    if (success)
+    {
+        uart_puts ("OK\r\n");
+    }
+    else
+    {
+        uart_puts ("ERROR\r\n");
+    }
 }
 
 /* ------------------------------------------------------------------------- *
@@ -260,12 +273,16 @@ int main (void)
     display_init ();                 // Initialize the display
     ds1302_init ();                  // Initialize the RTC
     uart_init (UART_BAUD_SELECT (9600, F_CPU)); // Initialize the UART
+    wdt_enable (WDTO_2S);            // Enable watchdog timer
 
     sei ();                          // Enable all interrupts
 
     /* -------------------------- Main loop -------------------------------- */
     while (1)
     {
+        // Watchdog
+        wdt_reset ();
+
         // Time
         ds1302_read_datetime (&current_datetime);
         time_correction (&current_datetime, &daily_corr);
@@ -343,6 +360,8 @@ int main (void)
         uart_chr = uart_getc ();
         while ((uart_chr & 0xff00) == 0)
         {
+            // Echo
+            uart_putc(uart_chr);
             // Put char to buffer
             uart_str[uart_str_indx++] = (uart_chr & 0xff);
             if (uart_str_indx >= UART_RX_BUFFER_SIZE)
@@ -351,7 +370,7 @@ int main (void)
                 break;
             }
             // Backspace correction
-            if (uart_str[uart_str_indx - 1] == 0x08)
+            if (uart_str[uart_str_indx - 1] == '\b')
             {
                 if (uart_str_indx < 2)
                     uart_str_indx = 0;
@@ -365,7 +384,8 @@ int main (void)
                     chr_to_lower (uart_str[1]) == 't' &&
                     chr_to_lower (uart_str[2]) == 'a' &&
                     chr_to_lower (uart_str[3]) == 't' &&
-                    chr_to_lower (uart_str[4]) == 'e')
+                    chr_to_lower (uart_str[4]) == 'u' &&
+                    chr_to_lower (uart_str[5]) == 's')
                 {
                         uart_puti (current_datetime.day);
                         uart_putc ('.');
@@ -488,7 +508,7 @@ int main (void)
                     current_datetime.weekday = uart_str_get_int (14, 1);
                     ds1302_write_datetime (&current_datetime);
                     ds1302_write_datetime_to_ram (0, &current_datetime);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 't' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -511,7 +531,7 @@ int main (void)
                     current_datetime.AMPM = AM;
                     ds1302_write_datetime (&current_datetime);
                     ds1302_write_datetime_to_ram (0, &current_datetime);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 't' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -534,7 +554,7 @@ int main (void)
                             daily_corr.min);
                     eeprom_update_byte (EE_ADDR_TIME_DAILY_CORR_SEC,
                             daily_corr.sec);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'h' &&
                          chr_to_lower (uart_str[1]) == 'e' &&
@@ -551,7 +571,7 @@ int main (void)
                     temp_h = uart_str_get_int (8, 2);
                     eeprom_update_byte (EE_ADDR_TEMP_L, temp_l);
                     eeprom_update_byte (EE_ADDR_TEMP_H, temp_h);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'h' &&
                          chr_to_lower (uart_str[1]) == 'e' &&
@@ -564,7 +584,7 @@ int main (void)
                     heat_mode = MANUAL;
                     eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
                     HEAT_ON;
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'h' &&
                          chr_to_lower (uart_str[1]) == 'e' &&
@@ -578,7 +598,7 @@ int main (void)
                     heat_mode = MANUAL;
                     eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
                     HEAT_OFF;
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'h' &&
                          chr_to_lower (uart_str[1]) == 'e' &&
@@ -592,7 +612,7 @@ int main (void)
                 {
                     heat_mode = AUTO;
                     eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'l' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -630,7 +650,7 @@ int main (void)
                     eeprom_update_byte (EE_ADDR_TIME_OFF_HOUR, time_off.hour);
                     eeprom_update_byte (EE_ADDR_TIME_OFF_MIN, time_off.min);
                     eeprom_update_byte (EE_ADDR_TIME_OFF_SEC, time_off.sec);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'l' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -644,7 +664,7 @@ int main (void)
                     light_mode = MANUAL;
                     eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
                     LIGHT_ON;
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'l' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -659,7 +679,7 @@ int main (void)
                     light_mode = MANUAL;
                     eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
                     LIGHT_OFF;
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'l' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -674,7 +694,7 @@ int main (void)
                 {
                     light_mode = AUTO;
                     eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'd' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -691,7 +711,7 @@ int main (void)
                 {
                     display_mode = SHOW_TIME;
                     eeprom_update_byte (EE_ADDR_DISPLAY_MODE, display_mode);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else if (chr_to_lower (uart_str[0]) == 'd' &&
                          chr_to_lower (uart_str[1]) == 'i' &&
@@ -708,11 +728,11 @@ int main (void)
                 {
                     display_mode = SHOW_TEMP;
                     eeprom_update_byte (EE_ADDR_DISPLAY_MODE, display_mode);
-                    uart_ok ();
+                    uart_ok (true);
                 }
                 else
                 {
-                    uart_puts ("ERROR\r\n");
+                    uart_ok (false);
                 }
                 uart_str_indx = 0;
             }

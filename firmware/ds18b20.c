@@ -18,7 +18,8 @@
 /*
  * ds18b20 init
  */
-uint8_t ds18b20_reset() {
+uint8_t ds18b20_reset ()
+{
     uint8_t i;
 
     //low for 480us
@@ -45,14 +46,15 @@ uint8_t ds18b20_reset() {
 /*
  * write one bit
  */
-void ds18b20_writebit(uint8_t bit){
+void ds18b20_writebit (uint8_t bit)
+{
     //low for 1uS
     DS18B20_PORT &= ~ (1<<DS18B20_DQ); //low
     DS18B20_DDR |= (1<<DS18B20_DQ); //output
     _delay_us(1);
 
     //if we want to write 1, release the line (if not will keep low)
-    if(bit)
+    if (bit)
         DS18B20_DDR &= ~(1<<DS18B20_DQ); //input
 
     //wait 60uS and release the line
@@ -65,7 +67,8 @@ void ds18b20_writebit(uint8_t bit){
 /*
  * read one bit
  */
-uint8_t ds18b20_readbit(void){
+uint8_t ds18b20_readbit (void)
+{
     uint8_t bit=0;
 
     //low for 1uS
@@ -78,7 +81,7 @@ uint8_t ds18b20_readbit(void){
     _delay_us(14);
 
     //read the value
-    if(DS18B20_PIN & (1<<DS18B20_DQ))
+    if (DS18B20_PIN & (1<<DS18B20_DQ))
         bit=1;
 
     //wait 45uS and return read value
@@ -91,9 +94,10 @@ uint8_t ds18b20_readbit(void){
 /*
  * write one byte
  */
-void ds18b20_writebyte(uint8_t byte){
-    uint8_t i=8;
-    while(i--){
+void ds18b20_writebyte (uint8_t byte)
+{
+    uint8_t i;
+    for (i=8; i>0; i--){
         ds18b20_writebit(byte&1);
         byte >>= 1;
     }
@@ -102,9 +106,10 @@ void ds18b20_writebyte(uint8_t byte){
 /*
  * read one byte
  */
-uint8_t ds18b20_readbyte(void){
-    uint8_t i=8, n=0;
-    while(i--){
+uint8_t ds18b20_readbyte (void)
+{
+    uint8_t i, n=0;
+    for (i=8; i>0; i--){
         n >>= 1;
         n |= (ds18b20_readbit()<<7);
     }
@@ -114,7 +119,8 @@ uint8_t ds18b20_readbyte(void){
 /*
  * get temperature
  */
-double ds18b20_gettemp() {
+double ds18b20_gettemp ()
+{
     uint8_t scratchpad[SCRATCHPAD_SIZE];
     uint8_t i;
     double temp_value = DS18B20_ERR;
@@ -142,8 +148,22 @@ double ds18b20_gettemp() {
     ds18b20_writebyte(DS18B20_CMD_CONVERTTEMP); //start temperature conversion
 
     sei();
-    while(!ds18b20_readbit()); //wait until conversion is complete
+    //wait until conversion is complete
+    switch (DS18B20_RES)
+    {
+        case DS18B20_RES_09: _delay_ms(94); break;
+        case DS18B20_RES_10: _delay_ms(188); break;
+        case DS18B20_RES_11: _delay_ms(375); break;
+        case DS18B20_RES_12: _delay_ms(750); break;
+    }
     cli();
+
+    // after comversion time ds18b20 must confirm success by high level
+    if (!ds18b20_readbit())
+    {
+        sei();
+        return DS18B20_ERR;
+    }
 
     // reset
     if (ds18b20_reset())

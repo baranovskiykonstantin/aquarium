@@ -7,11 +7,13 @@
 # License: GNU GPL v3 (see License.txt)
 # This Revision: 1
 
-DEVICE  = atmega8a
+DEVICE  = atmega8
 F_CPU   = 8000000
 FUSE_L  = 0x24
-FUSE_H  = 0xd7
-AVRDUDE = avrdude -c pickit2 clockrate=50000 -p m8 -v
+FUSE_H  = 0x97
+#AVRDUDE = avrdude -c usbasp -p $(DEVICE) -v
+#AVRDUDE = avrdude -c stk500v2 -P avrdoper -p $(DEVICE) -v
+AVRDUDE = avrdude -c pickit2 clockrate=50000 -p $(DEVICE) -v
 
 SOURCES = main.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c
 CFLAGS  = -I. -DDEBUG_LEVEL=0
@@ -28,7 +30,7 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 #        +-------------------- BODLEVEL    ( 4.0V )
 #
 # ATmega8A FUSE_H (Fuse high byte):
-# 0xd7 = 1 1 0 1   0 1 1 1
+# 0x97 = 1 0 0 1   0 1 1 1
 #        ^ ^ ^ ^   ^ \ / |
 #        | | | |   |  |  +---- BOOTRST     ( reset vector )
 #        | | | |   |  +------- BOOTSZ 1..0 ( min size )
