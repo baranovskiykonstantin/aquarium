@@ -1,0 +1,5 @@
+( page_layout
+  (setup(textsize 1.5 1.5)(linewidth 0.15)(textlinewidth 0.15)
+  (left_margin 1)(right_margin 1)(top_margin 1)(bottom_margin 2))
+  (tbtext " " (name text1:Text) (pos 0 0) (justify right))
+)
