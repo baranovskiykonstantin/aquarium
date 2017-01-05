@@ -738,7 +738,6 @@ int main (void)
             }
             uart_chr = uart_getc ();
         }
-        _delay_ms (100);
     }
     return 0;
 }
