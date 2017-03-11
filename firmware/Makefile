@@ -13,9 +13,9 @@ FUSE_L  = 0x24
 FUSE_H  = 0x97
 #AVRDUDE = avrdude -c usbasp -p $(DEVICE) -v
 #AVRDUDE = avrdude -c stk500v2 -P avrdoper -p $(DEVICE) -v
-AVRDUDE = avrdude -c pickit2 clockrate=50000 -p $(DEVICE) -v
+AVRDUDE = avrdude -c pickit2 -p $(DEVICE) -v
 
-SOURCES = main.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c
+SOURCES = main.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c adc.c pwm.c
 CFLAGS  = -I. -DDEBUG_LEVEL=0
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 
@@ -50,6 +50,10 @@ help:
 	@echo "make fuse ...... to flash the fuses"
 	@echo "make flash ..... to flash the firmware"
 	@echo "make clean ..... to delete objects and hex file"
+	@echo "make power ..... to turn power on"
+
+power:
+	pk2cmd -pPIC16F73 -A5 -R -T
 
 hex: main.hex
 

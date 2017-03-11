@@ -3,7 +3,7 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2015-12-28
  * Tabsize: 4
- * Copyright: (c) 2015 Baranovskiy Konstantin
+ * Copyright: (c) 2017 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
  * This Revision: 1
  */
@@ -21,12 +21,12 @@ void display_init (void)
 {
     /* I/O ports
      */
-    PORTB |= 0x3f;
-    DDRB |= 0x3f;
-    PORTC |= 0x0f;
-    DDRC |= 0x0f;
-    PORTD |= 0xc0;
-    DDRD |= 0xc0;
+    PORTB |= 0x83;
+    DDRB |= 0x83;
+    PORTC |= 0x38;
+    DDRC |= 0x38;
+    PORTD |= 0xFC;
+    DDRD |= 0xFC;
 
     /* Timer 2 - switch segments on display dynamically every 256 us
      */
@@ -38,10 +38,10 @@ void display_init (void)
      */
     current_digit = 0;
     current_segment = 0;
-    display[0] = 0x40;
-    display[1] = 0x40;
-    display[2] = 0x40;
-    display[3] = 0x40;
+    display[0] = 0xff;
+    display[1] = 0xff;
+    display[2] = 0xff;
+    display[3] = 0xff;
 }
 
 /* ---------------------- Shows the value of the time ---------------------- */
@@ -56,17 +56,14 @@ void display_time (datetime_t datetime)
         display[3] = symbols[datetime.hour / 10];
     if (datetime.sec % 2)
     {
-        display[2] |= 0x80;
-        display[3] |= 0x80;
+        display[0] |= 0x80;
+        display[1] |= 0x80;
     }
 }
 
 /* ------------------ Shows the value of the temperature ------------------- */
-void display_temp (double value)
+void display_temp (int8_t value)
 {
-    int32_t temp;
-    temp = lround(value);
-
     if (value == DS18B20_ERR)
     {
         display[0] = 0;
@@ -74,31 +71,31 @@ void display_temp (double value)
         display[2] = 0x40;
         display[3] = 0;
     }
-    else if (labs(temp) < 10)
+    else if (labs(value) < 10)
     {
         display[0] = 0;
-        display[1] = symbols[labs(temp)];
-        if (temp < 0)
+        display[1] = symbols[labs(value)];
+        if (value < 0)
             display[2] = 0x40; // -
         else
             display[2] = 0;
         display[3] = 0;
     }
-    else if (labs(temp) < 100)
+    else if (labs(value) < 100)
     {
         display[0] = 0;
-        display[1] = symbols[labs(temp) % 10];
-        display[2] = symbols[labs(temp) / 10];
-        if (temp < 0)
+        display[1] = symbols[labs(value) % 10];
+        display[2] = symbols[labs(value) / 10];
+        if (value < 0)
             display[3] = 0x40;
         else
             display[3] = 0;
     }
     else
     {
-        display[0] = symbols[labs(temp) % 10];
-        display[1] = symbols[labs(temp) % 100 / 10];
-        display[2] = symbols[labs(temp) % 1000 / 100];
+        display[0] = symbols[labs(value) % 10];
+        display[1] = symbols[labs(value) % 100 / 10];
+        display[2] = symbols[labs(value) % 1000 / 100];
         display[3] = 0;
     }
 }
@@ -107,6 +104,10 @@ void display_temp (double value)
 ISR (TIMER2_OVF_vect)
 {
     uint8_t i;
+
+    // Increase timer of temperature measurement
+    ds18b20_timer++;
+
     // Turn off all digits
     for (i=0; i < 4; i++)
         *(digits[i].port) &= ~(1<<digits[i].pin);

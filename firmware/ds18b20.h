@@ -3,7 +3,7 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2015-12-28
  * Tabsize: 4
- * Copyright: (c) 2015 Baranovskiy Konstantin
+ * Copyright: (c) 2017 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
  * This Revision: 1
  */
@@ -13,13 +13,20 @@
 
 #include <avr/io.h>
 
-#define DS18B20_ERR -111.11
+// status
+#define DS18B20_BUSY 126
+#define DS18B20_ERR 127
 
 //setup connection
-#define DS18B20_PORT PORTD
-#define DS18B20_DDR DDRD
-#define DS18B20_PIN PIND
-#define DS18B20_DQ PD3
+#define DS18B20_PORT PORTC
+#define DS18B20_DDR DDRC
+#define DS18B20_PIN PINC
+#define DS18B20_DQ PC2
+
+#define DS18B20_PWR_AS_OUT DDRC |= (1 << PC1)
+#define DS18B20_PWR_ON PORTC |= (1 << PC1)
+#define DS18B20_PWR_OFF PORTC &= ~(1 << PC1)
+#define DS18B20_PWR_STATE (PINC & (1 << PC1)) >> PC1
 
 //commands
 #define DS18B20_CMD_CONVERTTEMP 0x44
@@ -51,7 +58,10 @@
 /* 5-7 reserved */
 #define SCRATCHPAD_CRC 8
 
+//time counter
+volatile uint16_t ds18b20_timer;
+uint8_t ds18b20_convert_flag;
 //functions
-extern double ds18b20_gettemp();
+extern int8_t ds18b20_gettemp();
 
 #endif /* __DS18B20_H_INCLUDED__ */

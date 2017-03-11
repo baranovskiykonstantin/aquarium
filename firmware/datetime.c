@@ -163,7 +163,7 @@ void datetime_sub_time (datetime_t *datetime, time_t *time)
             tmp = days_in_month[datetime->month];
             // Leap-day
             if (datetime->month == 2 && ((datetime->year % 4) == 0 || datetime->year == 0))
-            tmp++;
+                tmp++;
 
             datetime->day = tmp;
         }

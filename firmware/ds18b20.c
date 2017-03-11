@@ -3,7 +3,7 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2015-12-28
  * Tabsize: 4
- * Copyright: (c) 2015 Baranovskiy Konstantin
+ * Copyright: (c) 2017 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
  * This Revision: 1
  */
@@ -119,71 +119,88 @@ uint8_t ds18b20_readbyte (void)
 /*
  * get temperature
  */
-double ds18b20_gettemp ()
+int8_t ds18b20_gettemp ()
 {
     uint8_t scratchpad[SCRATCHPAD_SIZE];
     uint8_t i;
     double temp_value = DS18B20_ERR;
+    uint16_t convert_time;
 
-    cli();
-    // reset
-    if (ds18b20_reset())
+    if (ds18b20_convert_flag)
     {
+        // time for conversion
+        // time counts by timer2 (see display.c)
+        switch (DS18B20_RES)
+        {
+            // 368 * 256us = 94ms
+            case DS18B20_RES_09: convert_time = 368; break;
+            // 735 * 256us = 188ms
+            case DS18B20_RES_10: convert_time = 735; break;
+            // 1465 * 256us = 375ms
+            case DS18B20_RES_11: convert_time = 1465; break;
+            // 2930 * 256us = 750ms
+            case DS18B20_RES_12: convert_time = 2930; break;
+        }
+
+        if (ds18b20_timer > convert_time)
+            ds18b20_convert_flag = 0;
+
+        return DS18B20_BUSY;
+    }
+    else
+    {
+        /* Read value of the measured temperature */
+
+        cli();
+        // reset
+        if (ds18b20_reset())
+        {
+            sei();
+            return DS18B20_ERR;
+        }
+        ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
+        ds18b20_writebyte(DS18B20_CMD_RSCRATCHPAD); //read scratchpad
+
+        //read scratchpad
+        for (i=0; i<SCRATCHPAD_SIZE; i++)
+            scratchpad[i] = ds18b20_readbyte();
+
         sei();
-        return DS18B20_ERR;
-    }
-    ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
-    ds18b20_writebyte(DS18B20_CMD_WSCRATCHPAD); //write to scratchpad
-    ds18b20_writebyte(0x00); //alarm trigger TH
-    ds18b20_writebyte(0x00); //alarm trigger TL
-    ds18b20_writebyte(DS18B20_RES); //conversion resolution
 
-    // reset
-    if (ds18b20_reset())
-    {
+        if (crc8(scratchpad, SCRATCHPAD_SIZE - 1) == scratchpad[SCRATCHPAD_CRC])
+            //convert the value obtained
+            temp_value = ((scratchpad[SCRATCHPAD_TEMP_H] << 8) + scratchpad[SCRATCHPAD_TEMP_L]) * 0.0625;
+
+        /* Start new measurement */
+
+        cli();
+        // reset
+        if (ds18b20_reset())
+        {
+            sei();
+            return DS18B20_ERR;
+        }
+        ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
+        ds18b20_writebyte(DS18B20_CMD_WSCRATCHPAD); //write to scratchpad
+        ds18b20_writebyte(DS18B20_RES); //conversion resolution
+
         sei();
-        return DS18B20_ERR;
-    }
-    ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
-    ds18b20_writebyte(DS18B20_CMD_CONVERTTEMP); //start temperature conversion
+        _delay_ms (1); // Update display
+        cli();
 
-    sei();
-    //wait until conversion is complete
-    switch (DS18B20_RES)
-    {
-        case DS18B20_RES_09: _delay_ms(94); break;
-        case DS18B20_RES_10: _delay_ms(188); break;
-        case DS18B20_RES_11: _delay_ms(375); break;
-        case DS18B20_RES_12: _delay_ms(750); break;
-    }
-    cli();
-
-    // after comversion time ds18b20 must confirm success by high level
-    if (!ds18b20_readbit())
-    {
+        // reset
+        if (ds18b20_reset())
+        {
+            sei();
+            return DS18B20_ERR;
+        }
+        ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
+        ds18b20_writebyte(DS18B20_CMD_CONVERTTEMP); //start temperature conversion
         sei();
-        return DS18B20_ERR;
+
+        ds18b20_timer = 0;
+        ds18b20_convert_flag = 1;
+
+        return (uint8_t)temp_value;
     }
-
-    // reset
-    if (ds18b20_reset())
-    {
-        sei();
-        return DS18B20_ERR;
-    }
-    ds18b20_writebyte(DS18B20_CMD_SKIPROM); //skip ROM
-    ds18b20_writebyte(DS18B20_CMD_RSCRATCHPAD); //read scratchpad
-
-    //read scratchpad
-    for (i=0; i<SCRATCHPAD_SIZE; i++)
-        scratchpad[i] = ds18b20_readbyte();
-
-    sei();
-
-    if (crc8(scratchpad, SCRATCHPAD_SIZE - 1) == scratchpad[SCRATCHPAD_CRC])
-        //convert the value obtained
-        temp_value = ((scratchpad[SCRATCHPAD_TEMP_H] << 8) + scratchpad[SCRATCHPAD_TEMP_L]) * 0.0625;
-
-
-    return temp_value;
 }

@@ -3,7 +3,7 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2015-12-28
  * Tabsize: 4
- * Copyright: (c) 2015 Baranovskiy Konstantin
+ * Copyright: (c) 2017 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
  * This Revision: 1
  */
