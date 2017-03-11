@@ -19,7 +19,10 @@
 Все элементы смонтированы в крышке изготовленной из оргстекла.
 
 ## Схема
+### Контроллер
 ![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-schematic.png)
+
+### Блок питания
 ![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/power-schematic.png)
 
 Дисплей работает в двух режимах:<br>
@@ -30,7 +33,10 @@
 Температура отображается в диапазоне `-55...125`°C. При отключенном датчике отображается `" -- "`.<br>
 
 ## Печатные платы
+### Верх
 ![pcb-top](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-top.png)
+
+### Низ
 ![pcb-bottom](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-bottom.png)
 
 Для монтажа дисплея на плату нужно отогнуть выводы под прямым углом наружу.
