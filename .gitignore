@@ -3,3 +3,4 @@ aquarium.bak
 aquarium.xml
 power.bak
 aquarium.kicad_pcb-bak
+*.elf
