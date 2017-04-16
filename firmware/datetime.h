@@ -52,11 +52,6 @@ typedef struct
 const static uint8_t days_in_month[] = {0, 31, 28, 31,30,31,30,31,31,30,31,30,31};
 
 /*
- * Subtraction of two datetimes in days.
- */
-int32_t datetime_diff_in_days (datetime_t *datetime1, datetime_t *datetime2);
-
-/*
  * Add the time to the datetime.
  */
 void datetime_add_time (datetime_t *datetime, time_t *time);

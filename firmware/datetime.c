@@ -11,42 +11,6 @@
 #include "datetime.h"
 
 /*
- * Get count of days for datetime.
- * Years counts from 00 to 99 (see ds1302 datasheet).
- */
-int32_t datetime_days_count (datetime_t *datetime)
-{
-    uint8_t i;
-    int32_t days = 0;
-    // Days of full years
-    days += datetime->year * 365;
-    // Leap-days for all years except current
-    if (datetime->year > 0)
-        days += (datetime->year - 1) / 4 + 1;
-    // Days of months
-    for (i=1; i < datetime->month; i++)
-    {
-        days += days_in_month[i];
-        if (i == 2 && (datetime->year == 0 || (datetime->year % 4) == 0))
-            days++;
-    }
-    // Days of the current month
-    days += datetime->day;
-
-    return days;
-}
-
-/*
- * Subtraction of two datetimes in days.
- */
-int32_t datetime_diff_in_days (datetime_t *datetime1, datetime_t *datetime2)
-{
-    int32_t datetime1_days = datetime_days_count(datetime1);
-    int32_t datetime2_days = datetime_days_count(datetime2);
-    return datetime1_days - datetime2_days;
-}
-
-/*
  * Add the time to the datetime.
  */
 void datetime_add_time (datetime_t *datetime, time_t *time)

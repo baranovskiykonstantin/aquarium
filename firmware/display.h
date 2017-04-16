@@ -62,7 +62,7 @@ extern void display_init (void);
 
 /* Shows the current value of the time on the display.
  */
-extern void display_time (datetime_t);
+extern void display_time (datetime_t *);
 
 /* Shows the current value of the temperature on the display.
  */

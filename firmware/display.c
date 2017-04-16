@@ -45,16 +45,16 @@ void display_init (void)
 }
 
 /* ---------------------- Shows the value of the time ---------------------- */
-void display_time (datetime_t datetime)
+void display_time (datetime_t *datetime)
 {
-    display[0] = symbols[datetime.min % 10];
-    display[1] = symbols[datetime.min / 10];
-    display[2] = symbols[datetime.hour % 10];
-    if (datetime.hour < 10)
+    display[0] = symbols[datetime->min % 10];
+    display[1] = symbols[datetime->min / 10];
+    display[2] = symbols[datetime->hour % 10];
+    if (datetime->hour < 10)
         display[3] = 0;
     else
-        display[3] = symbols[datetime.hour / 10];
-    if (datetime.sec % 2)
+        display[3] = symbols[datetime->hour / 10];
+    if (datetime->sec % 2)
     {
         display[0] |= 0x80;
         display[1] |= 0x80;
