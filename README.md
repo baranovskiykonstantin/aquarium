@@ -125,7 +125,7 @@
 
 Формат 3:
 
-`time HH:MM:SS +CC`
+`time HH:MM:SS +CC`<br>
 `time HH:MM:SS -CC`
 
 Параметры:<br>
