@@ -143,7 +143,8 @@ void time_correction (datetime_t *datetime_current,
              datetime_current->month > datetime_corr->month) ||
             (datetime_current->year == datetime_corr->year &&
              datetime_current->month == datetime_corr->month &&
-             datetime_current->day > datetime_corr->day))
+             datetime_current->day > datetime_corr->day)
+            )
     {
         // ... and if the current time bigger than time of the setup time...
         if (datetime_current->hour > datetime_corr->hour ||
@@ -151,7 +152,8 @@ void time_correction (datetime_t *datetime_current,
                  datetime_current->min > datetime_corr->min) ||
                 (datetime_current->hour == datetime_corr->hour &&
                  datetime_current->min == datetime_corr->min &&
-                 datetime_current->sec > datetime_corr->sec))
+                 datetime_current->sec > datetime_corr->sec)
+                )
         {
             // Apply time correction
             // In AMPM is stored sign of the time correction
@@ -303,14 +305,16 @@ int main (void)
                       datetime_current->min > time_on.min) ||
                      (datetime_current->hour >= time_on.hour &&
                      datetime_current->min >= time_on.min &&
-                     datetime_current->sec >= time_on.sec))
+                     datetime_current->sec >= time_on.sec)
+                     )
                     &&
                     ((datetime_current->hour < time_off.hour) ||
                      (datetime_current->hour <= time_off.hour &&
                       datetime_current->min < time_off.min) ||
                      (datetime_current->hour <= time_off.hour &&
                       datetime_current->min <= time_off.min &&
-                      datetime_current->sec < time_off.sec)))
+                      datetime_current->sec < time_off.sec))
+                    )
                     pwm_enable ();
                 else
                     pwm_disable ();
@@ -377,7 +381,7 @@ int main (void)
             if (sensor_state != sensor_prev_state)
             {
                 // Eliminate random triggers
-                _delay_ms (150);
+                _delay_ms (100);
                 sensor_state = get_sensor_state (SENSOR_1);
                 if (sensor_state != sensor_prev_state)
                 {
@@ -438,12 +442,14 @@ int main (void)
                     uart_str[2] == 'a' &&
                     uart_str[3] == 't' &&
                     uart_str[4] == 'u' &&
-                    uart_str[5] == 's')
+                    uart_str[5] == 's'
+                    )
                 {
+                        uart_puts ("Date: ");
                         uart_puti (datetime_current->day, 2);
                         uart_putc ('.');
                         uart_puti (datetime_current->month, 2);
-                        uart_puts (".20");
+                        uart_putc ('.');
                         uart_puti (datetime_current->year, 2);
                         uart_putc (' ');
                         switch (datetime_current->weekday)
@@ -456,7 +462,7 @@ int main (void)
                             case 6: uart_puts ("Saturday"); break;
                             case 7: uart_puts ("Sunday"); break;
                         }
-                        uart_putc (' ');
+                        uart_puts ("\r\nTime: ");
                         uart_puti (datetime_current->hour, 2);
                         uart_putc (':');
                         uart_puti (datetime_current->min, 2);
@@ -547,7 +553,8 @@ int main (void)
                          chr_is_digit (uart_str[11]) &&
                          chr_is_digit (uart_str[12]) &&
                          uart_str[13] == ' ' &&
-                         chr_is_digit (uart_str[14]))
+                         chr_is_digit (uart_str[14])
+                         )
                 {
                     datetime_current->day = uart_str_get_int (5, 2);
                     if (datetime_current->day > 31)
@@ -568,7 +575,8 @@ int main (void)
                          uart_str[1] == 'i' &&
                          uart_str[2] == 'm' &&
                          uart_str[3] == 'e' &&
-                         uart_str[4] == ' ')
+                         uart_str[4] == ' '
+                         )
                 {
                     if (chr_is_digit (uart_str[5]) &&
                         chr_is_digit (uart_str[6]) &&
@@ -577,27 +585,63 @@ int main (void)
                         chr_is_digit (uart_str[9]) &&
                         uart_str[10] == ':' &&
                         chr_is_digit (uart_str[11]) &&
-                        chr_is_digit (uart_str[12]))
+                        chr_is_digit (uart_str[12])
+                        )
                     {
-                        datetime_current->hour = uart_str_get_int (5, 2);
-                        if (datetime_current->hour > 23)
-                            datetime_current->hour = 23;
-                        datetime_current->min = uart_str_get_int (8, 2);
-                        if (datetime_current->min > 59)
-                            datetime_current->min =59;
-                        datetime_current->sec = uart_str_get_int (11, 2);
-                        if (datetime_current->sec > 59)
-                            datetime_current->sec = 59;
-                        datetime_current->H12_24 = H24;
-                        datetime_current->AMPM = AM;
-                        ds1302_write_datetime (datetime_current);
-                        datetime_corr = datetime_current;
-                        ds1302_write_datetime_to_ram (0, datetime_corr);
-                        uart_ok (1);
+                        if (uart_str[13] == ' ' &&
+                            (uart_str[14] == '+'|| uart_str[14] == '-') &&
+                            chr_is_digit (uart_str[15]) &&
+                            chr_is_digit (uart_str[16])
+                            )
+                        {
+                            datetime_current->hour = uart_str_get_int (5, 2);
+                            if (datetime_current->hour > 23)
+                                datetime_current->hour = 23;
+                            datetime_current->min = uart_str_get_int (8, 2);
+                            if (datetime_current->min > 59)
+                                datetime_current->min =59;
+                            datetime_current->sec = uart_str_get_int (11, 2);
+                            if (datetime_current->sec > 59)
+                                datetime_current->sec = 59;
+                            datetime_current->H12_24 = H24;
+                            datetime_current->AMPM = AM;
+                            ds1302_write_datetime (datetime_current);
+                            datetime_corr = datetime_current;
+                            ds1302_write_datetime_to_ram (0, datetime_corr);
+
+                            daily_corr.AMPM = uart_str[14];
+                            daily_corr.sec = uart_str_get_int (15, 2);
+                            if (daily_corr.sec > 59)
+                                daily_corr.sec = 59;
+                            eeprom_update_byte (EE_ADDR_TIME_DAILY_CORR_SIGN,
+                                    daily_corr.AMPM);
+                            eeprom_update_byte (EE_ADDR_TIME_DAILY_CORR_SEC,
+                                    daily_corr.sec);
+                            uart_ok (1);
+                        }
+                        else
+                        {
+                            datetime_current->hour = uart_str_get_int (5, 2);
+                            if (datetime_current->hour > 23)
+                                datetime_current->hour = 23;
+                            datetime_current->min = uart_str_get_int (8, 2);
+                            if (datetime_current->min > 59)
+                                datetime_current->min =59;
+                            datetime_current->sec = uart_str_get_int (11, 2);
+                            if (datetime_current->sec > 59)
+                                datetime_current->sec = 59;
+                            datetime_current->H12_24 = H24;
+                            datetime_current->AMPM = AM;
+                            ds1302_write_datetime (datetime_current);
+                            datetime_corr = datetime_current;
+                            ds1302_write_datetime_to_ram (0, datetime_corr);
+                            uart_ok (1);
+                        }
                     }
                     else if ((uart_str[5] == '+'|| uart_str[5] == '-') &&
                              chr_is_digit (uart_str[6]) &&
-                             chr_is_digit (uart_str[7]))
+                             chr_is_digit (uart_str[7])
+                             )
                     {
                         daily_corr.AMPM = uart_str[5];
                         daily_corr.sec = uart_str_get_int (6, 2);
@@ -618,13 +662,15 @@ int main (void)
                          uart_str[1] == 'e' &&
                          uart_str[2] == 'a' &&
                          uart_str[3] == 't' &&
-                         uart_str[4] == ' ')
+                         uart_str[4] == ' '
+                         )
                 {
                     if (chr_is_digit (uart_str[5]) &&
                         chr_is_digit (uart_str[6]) &&
                         uart_str[7] == '-' &&
                         chr_is_digit (uart_str[8]) &&
-                        chr_is_digit (uart_str[9]))
+                        chr_is_digit (uart_str[9])
+                        )
                     {
                         temp_l = uart_str_get_int (5, 2);
                         temp_h = uart_str_get_int (8, 2);
@@ -633,7 +679,8 @@ int main (void)
                         uart_ok (1);
                     }
                     else if (uart_str[5] == 'o' &&
-                             uart_str[6] == 'n')
+                             uart_str[6] == 'n'
+                             )
                     {
                         heat_mode = MANUAL;
                         eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
@@ -642,7 +689,8 @@ int main (void)
                     }
                     else if (uart_str[5] == 'o' &&
                              uart_str[6] == 'f' &&
-                             uart_str[7] == 'f')
+                             uart_str[7] == 'f'
+                             )
                     {
                         heat_mode = MANUAL;
                         eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
@@ -652,7 +700,8 @@ int main (void)
                     else if (uart_str[5] == 'a' &&
                              uart_str[6] == 'u' &&
                              uart_str[7] == 't' &&
-                             uart_str[8] == 'o')
+                             uart_str[8] == 'o'
+                             )
                     {
                         heat_mode = AUTO;
                         eeprom_update_byte (EE_ADDR_HEAT_MODE, heat_mode);
@@ -668,7 +717,8 @@ int main (void)
                          uart_str[2] == 'g' &&
                          uart_str[3] == 'h' &&
                          uart_str[4] == 't' &&
-                         uart_str[5] == ' ')
+                         uart_str[5] == ' '
+                         )
                 {
                     if (chr_is_digit (uart_str[6]) &&
                         chr_is_digit (uart_str[7]) &&
@@ -686,36 +736,78 @@ int main (void)
                         chr_is_digit (uart_str[19]) &&
                         uart_str[20] == ':' &&
                         chr_is_digit (uart_str[21]) &&
-                        chr_is_digit (uart_str[22]))
+                        chr_is_digit (uart_str[22])
+                        )
                     {
-                        time_on.hour = uart_str_get_int (6, 2);
-                        if (time_on.hour > 23)
-                            time_on.hour = 23;
-                        time_on.min = uart_str_get_int (9, 2);
-                        if (time_on.min > 59)
-                            time_on.min = 59;
-                        time_on.sec = uart_str_get_int (12, 2);
-                        if (time_on.sec > 59)
-                            time_on.sec =59;
-                        time_off.hour = uart_str_get_int (15, 2);
-                        if (time_off.hour > 23)
-                            time_off.hour = 23;
-                        time_off.min = uart_str_get_int (18, 2);
-                        if (time_off.min > 59)
-                            time_off.min = 59;
-                        time_off.sec = uart_str_get_int (21, 2);
-                        if (time_off.sec > 59)
-                            time_off.sec =59;
-                        eeprom_update_byte (EE_ADDR_TIME_ON_HOUR, time_on.hour);
-                        eeprom_update_byte (EE_ADDR_TIME_ON_MIN, time_on.min);
-                        eeprom_update_byte (EE_ADDR_TIME_ON_SEC, time_on.sec);
-                        eeprom_update_byte (EE_ADDR_TIME_OFF_HOUR, time_off.hour);
-                        eeprom_update_byte (EE_ADDR_TIME_OFF_MIN, time_off.min);
-                        eeprom_update_byte (EE_ADDR_TIME_OFF_SEC, time_off.sec);
-                        uart_ok (1);
+                        if (uart_str[23] == ' ' &&
+                            chr_is_digit (uart_str[24]) &&
+                            chr_is_digit (uart_str[25]) &&
+                            chr_is_digit (uart_str[26])
+                            )
+                        {
+                            time_on.hour = uart_str_get_int (6, 2);
+                            if (time_on.hour > 23)
+                                time_on.hour = 23;
+                            time_on.min = uart_str_get_int (9, 2);
+                            if (time_on.min > 59)
+                                time_on.min = 59;
+                            time_on.sec = uart_str_get_int (12, 2);
+                            if (time_on.sec > 59)
+                                time_on.sec =59;
+                            time_off.hour = uart_str_get_int (15, 2);
+                            if (time_off.hour > 23)
+                                time_off.hour = 23;
+                            time_off.min = uart_str_get_int (18, 2);
+                            if (time_off.min > 59)
+                                time_off.min = 59;
+                            time_off.sec = uart_str_get_int (21, 2);
+                            if (time_off.sec > 59)
+                                time_off.sec =59;
+                            eeprom_update_byte (EE_ADDR_TIME_ON_HOUR, time_on.hour);
+                            eeprom_update_byte (EE_ADDR_TIME_ON_MIN, time_on.min);
+                            eeprom_update_byte (EE_ADDR_TIME_ON_SEC, time_on.sec);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_HOUR, time_off.hour);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_MIN, time_off.min);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_SEC, time_off.sec);
+
+                            pwm_top_level = uart_str_get_int (24, 3);
+                            if (pwm_top_level > 100)
+                                pwm_top_level = 100;
+                            pwm_update_level ();
+                            eeprom_update_byte (EE_ADDR_LIGHT_TOP_LEVEL, pwm_top_level);
+                            uart_ok (1);
+                        }
+                        else
+                        {
+                            time_on.hour = uart_str_get_int (6, 2);
+                            if (time_on.hour > 23)
+                                time_on.hour = 23;
+                            time_on.min = uart_str_get_int (9, 2);
+                            if (time_on.min > 59)
+                                time_on.min = 59;
+                            time_on.sec = uart_str_get_int (12, 2);
+                            if (time_on.sec > 59)
+                                time_on.sec =59;
+                            time_off.hour = uart_str_get_int (15, 2);
+                            if (time_off.hour > 23)
+                                time_off.hour = 23;
+                            time_off.min = uart_str_get_int (18, 2);
+                            if (time_off.min > 59)
+                                time_off.min = 59;
+                            time_off.sec = uart_str_get_int (21, 2);
+                            if (time_off.sec > 59)
+                                time_off.sec =59;
+                            eeprom_update_byte (EE_ADDR_TIME_ON_HOUR, time_on.hour);
+                            eeprom_update_byte (EE_ADDR_TIME_ON_MIN, time_on.min);
+                            eeprom_update_byte (EE_ADDR_TIME_ON_SEC, time_on.sec);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_HOUR, time_off.hour);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_MIN, time_off.min);
+                            eeprom_update_byte (EE_ADDR_TIME_OFF_SEC, time_off.sec);
+                        }
                     }
                     else if (uart_str[6] == 'o' &&
-                             uart_str[7] == 'n')
+                             uart_str[7] == 'n'
+                             )
                     {
                         light_mode = MANUAL;
                         eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
@@ -724,7 +816,8 @@ int main (void)
                     }
                     else if (uart_str[6] == 'o' &&
                              uart_str[7] == 'f' &&
-                             uart_str[8] == 'f')
+                             uart_str[8] == 'f'
+                             )
                     {
                         light_mode = MANUAL;
                         eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
@@ -734,7 +827,8 @@ int main (void)
                     else if (uart_str[6] == 'a' &&
                              uart_str[7] == 'u' &&
                              uart_str[8] == 't' &&
-                             uart_str[9] == 'o')
+                             uart_str[9] == 'o'
+                             )
                     {
                         light_mode = AUTO;
                         eeprom_update_byte (EE_ADDR_LIGHT_MODE, light_mode);
@@ -748,7 +842,8 @@ int main (void)
                              uart_str[11] == ' ' &&
                              chr_is_digit (uart_str[12]) &&
                              chr_is_digit (uart_str[13]) &&
-                             chr_is_digit (uart_str[14]))
+                             chr_is_digit (uart_str[14])
+                             )
                     {
                         pwm_top_level = uart_str_get_int (12, 3);
                         if (pwm_top_level > 100)
@@ -769,12 +864,14 @@ int main (void)
                          uart_str[4] == 'l' &&
                          uart_str[5] == 'a' &&
                          uart_str[6] == 'y' &&
-                         uart_str[7] == ' ')
+                         uart_str[7] == ' '
+                         )
                 {
                     if (uart_str[8]  == 't' &&
                         uart_str[9]  == 'i' &&
                         uart_str[10] == 'm' &&
-                        uart_str[11] == 'e')
+                        uart_str[11] == 'e'
+                        )
                     {
                         display_mode = SHOW_TIME;
                         display_time (datetime_current);
@@ -784,7 +881,8 @@ int main (void)
                     else if (uart_str[8]  == 't' &&
                              uart_str[9]  == 'e' &&
                              uart_str[10] == 'm' &&
-                             uart_str[11] == 'p')
+                             uart_str[11] == 'p'
+                             )
                     {
                         display_mode = SHOW_TEMP;
                         display_temp (temp_value);
