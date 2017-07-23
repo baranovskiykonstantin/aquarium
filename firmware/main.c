@@ -15,6 +15,7 @@
 #include <util/delay.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "display.h"
 #include "ds18b20.h"
@@ -381,7 +382,7 @@ int main (void)
             if (sensor_state != sensor_prev_state)
             {
                 // Eliminate random triggers
-                _delay_ms (100);
+                _delay_ms (50);
                 sensor_state = get_sensor_state (SENSOR_1);
                 if (sensor_state != sensor_prev_state)
                 {
@@ -567,7 +568,7 @@ int main (void)
                     if (datetime_current->weekday > 7)
                         datetime_current->weekday = 7;
                     ds1302_write_datetime (datetime_current);
-                    datetime_corr = datetime_current;
+                    memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
                     ds1302_write_datetime_to_ram (0, datetime_corr);
                     uart_ok (1);
                 }
@@ -606,7 +607,7 @@ int main (void)
                             datetime_current->H12_24 = H24;
                             datetime_current->AMPM = AM;
                             ds1302_write_datetime (datetime_current);
-                            datetime_corr = datetime_current;
+                            memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
                             ds1302_write_datetime_to_ram (0, datetime_corr);
 
                             daily_corr.AMPM = uart_str[14];
@@ -633,7 +634,7 @@ int main (void)
                             datetime_current->H12_24 = H24;
                             datetime_current->AMPM = AM;
                             ds1302_write_datetime (datetime_current);
-                            datetime_corr = datetime_current;
+                            memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
                             ds1302_write_datetime_to_ram (0, datetime_corr);
                             uart_ok (1);
                         }
