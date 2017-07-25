@@ -76,7 +76,7 @@ LICENSE:
 #endif
 /** Size of the circular transmit buffer, must be power of 2 */
 #ifndef UART_TX_BUFFER_SIZE
-#define UART_TX_BUFFER_SIZE 64
+#define UART_TX_BUFFER_SIZE 32
 #endif
 
 /* test if the size of the circular buffers fits into SRAM */

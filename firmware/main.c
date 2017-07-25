@@ -192,10 +192,11 @@ int main (void)
 
     uint8_t display_mode = SHOW_TIME;
 
-    datetime_t * volatile datetime_current;
-    datetime_t * volatile datetime_corr;
-    datetime_t * volatile datetime_tmp;
-    time_t daily_corr, time_on, time_off;
+    datetime_t datetime_current;
+    datetime_t datetime_corr;
+    time_t daily_corr;
+
+    time_t time_on, time_off;
 
     uint8_t temp_fail_counter = 0;
     int8_t temp_tmp;
@@ -249,7 +250,7 @@ int main (void)
     display_mode = eeprom_read_byte (EE_ADDR_DISPLAY_MODE);
 
     // Read date and time of the last time correction from RAM of DS1302
-    ds1302_read_datetime_from_ram (0, datetime_corr);
+    ds1302_read_datetime_from_ram (0, &datetime_corr);
 
     sei ();                          // Enable all interrupts
 
@@ -263,12 +264,12 @@ int main (void)
     wdt_reset ();
 
     // Read time
-    ds1302_read_datetime (datetime_current);
+    ds1302_read_datetime (&datetime_current);
 
     // Update display
     switch (display_mode)
     {
-        case SHOW_TIME: display_time (datetime_current); break;
+        case SHOW_TIME: display_time (&datetime_current); break;
         case SHOW_TEMP: display_temp (temp_value); break;
     }
 
@@ -283,17 +284,17 @@ int main (void)
         // Time
         if ((loop_count % 1000) == 0)
         {
-            ds1302_read_datetime (datetime_current);
+            ds1302_read_datetime (&datetime_current);
             if (display_mode == SHOW_TIME)
             {
-                display_time (datetime_current);
+                display_time (&datetime_current);
             }
         }
 
         // Time correction
         if (loop_count == 0)
         {
-            time_correction (datetime_current, datetime_corr, &daily_corr);
+            time_correction (&datetime_current, &datetime_corr, &daily_corr);
         }
 
         // Light
@@ -301,20 +302,20 @@ int main (void)
         {
             if (light_mode == AUTO)
             {
-                if (((datetime_current->hour > time_on.hour) ||
-                     (datetime_current->hour >= time_on.hour &&
-                      datetime_current->min > time_on.min) ||
-                     (datetime_current->hour >= time_on.hour &&
-                     datetime_current->min >= time_on.min &&
-                     datetime_current->sec >= time_on.sec)
+                if (((datetime_current.hour > time_on.hour) ||
+                     (datetime_current.hour >= time_on.hour &&
+                      datetime_current.min > time_on.min) ||
+                     (datetime_current.hour >= time_on.hour &&
+                     datetime_current.min >= time_on.min &&
+                     datetime_current.sec >= time_on.sec)
                      )
                     &&
-                    ((datetime_current->hour < time_off.hour) ||
-                     (datetime_current->hour <= time_off.hour &&
-                      datetime_current->min < time_off.min) ||
-                     (datetime_current->hour <= time_off.hour &&
-                      datetime_current->min <= time_off.min &&
-                      datetime_current->sec < time_off.sec))
+                    ((datetime_current.hour < time_off.hour) ||
+                     (datetime_current.hour <= time_off.hour &&
+                      datetime_current.min < time_off.min) ||
+                     (datetime_current.hour <= time_off.hour &&
+                      datetime_current.min <= time_off.min &&
+                      datetime_current.sec < time_off.sec))
                     )
                     pwm_enable ();
                 else
@@ -395,7 +396,7 @@ int main (void)
                                             display_temp (temp_value);
                                             break;
                             case SHOW_TEMP: display_mode = SHOW_TIME;
-                                            display_time (datetime_current);
+                                            display_time (&datetime_current);
                                             break;
                         }
                         eeprom_update_byte (EE_ADDR_DISPLAY_MODE, display_mode);
@@ -447,13 +448,13 @@ int main (void)
                     )
                 {
                         uart_puts ("Date: ");
-                        uart_puti (datetime_current->day, 2);
+                        uart_puti (datetime_current.day, 2);
                         uart_putc ('.');
-                        uart_puti (datetime_current->month, 2);
+                        uart_puti (datetime_current.month, 2);
                         uart_putc ('.');
-                        uart_puti (datetime_current->year, 2);
+                        uart_puti (datetime_current.year, 2);
                         uart_putc (' ');
-                        switch (datetime_current->weekday)
+                        switch (datetime_current.weekday)
                         {
                             case 1: uart_puts ("Monday"); break;
                             case 2: uart_puts ("Tuesday"); break;
@@ -464,21 +465,21 @@ int main (void)
                             case 7: uart_puts ("Sunday"); break;
                         }
                         uart_puts ("\r\nTime: ");
-                        uart_puti (datetime_current->hour, 2);
+                        uart_puti (datetime_current.hour, 2);
                         uart_putc (':');
-                        uart_puti (datetime_current->min, 2);
+                        uart_puti (datetime_current.min, 2);
                         uart_putc (':');
-                        uart_puti (datetime_current->sec, 2);
+                        uart_puti (datetime_current.sec, 2);
                         uart_puts (" (");
                         uart_putc (daily_corr.AMPM);
                         uart_puti (daily_corr.sec, 0);
                         uart_puts (" sec at ");
-                        ds1302_read_datetime_from_ram(0, datetime_tmp);
-                        uart_puti (datetime_tmp->hour, 2);
+                        ds1302_read_datetime_from_ram(0, &datetime_corr);
+                        uart_puti (datetime_corr.hour, 2);
                         uart_putc (':');
-                        uart_puti (datetime_tmp->min, 2);
+                        uart_puti (datetime_corr.min, 2);
                         uart_putc (':');
-                        uart_puti (datetime_tmp->sec, 2);
+                        uart_puti (datetime_corr.sec, 2);
                         uart_putc (')');
                         uart_puts ("\r\nTemp: ");
                         if (temp_value == DS18B20_ERR)
@@ -557,19 +558,19 @@ int main (void)
                          chr_is_digit (uart_str[14])
                          )
                 {
-                    datetime_current->day = uart_str_get_int (5, 2);
-                    if (datetime_current->day > 31)
-                        datetime_current->day = 31;
-                    datetime_current->month = uart_str_get_int (8, 2);
-                    if (datetime_current->month > 12)
-                        datetime_current->month = 12;
-                    datetime_current->year = uart_str_get_int (11, 2);
-                    datetime_current->weekday = uart_str_get_int (14, 1);
-                    if (datetime_current->weekday > 7)
-                        datetime_current->weekday = 7;
-                    ds1302_write_datetime (datetime_current);
-                    memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
-                    ds1302_write_datetime_to_ram (0, datetime_corr);
+                    datetime_current.day = uart_str_get_int (5, 2);
+                    if (datetime_current.day > 31)
+                        datetime_current.day = 31;
+                    datetime_current.month = uart_str_get_int (8, 2);
+                    if (datetime_current.month > 12)
+                        datetime_current.month = 12;
+                    datetime_current.year = uart_str_get_int (11, 2);
+                    datetime_current.weekday = uart_str_get_int (14, 1);
+                    if (datetime_current.weekday > 7)
+                        datetime_current.weekday = 7;
+                    ds1302_write_datetime (&datetime_current);
+                    datetime_corr = datetime_current;
+                    ds1302_write_datetime_to_ram (0, &datetime_corr);
                     uart_ok (1);
                 }
                 else if (uart_str[0] == 't' &&
@@ -595,20 +596,20 @@ int main (void)
                             chr_is_digit (uart_str[16])
                             )
                         {
-                            datetime_current->hour = uart_str_get_int (5, 2);
-                            if (datetime_current->hour > 23)
-                                datetime_current->hour = 23;
-                            datetime_current->min = uart_str_get_int (8, 2);
-                            if (datetime_current->min > 59)
-                                datetime_current->min =59;
-                            datetime_current->sec = uart_str_get_int (11, 2);
-                            if (datetime_current->sec > 59)
-                                datetime_current->sec = 59;
-                            datetime_current->H12_24 = H24;
-                            datetime_current->AMPM = AM;
-                            ds1302_write_datetime (datetime_current);
-                            memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
-                            ds1302_write_datetime_to_ram (0, datetime_corr);
+                            datetime_current.hour = uart_str_get_int (5, 2);
+                            if (datetime_current.hour > 23)
+                                datetime_current.hour = 23;
+                            datetime_current.min = uart_str_get_int (8, 2);
+                            if (datetime_current.min > 59)
+                                datetime_current.min =59;
+                            datetime_current.sec = uart_str_get_int (11, 2);
+                            if (datetime_current.sec > 59)
+                                datetime_current.sec = 59;
+                            datetime_current.H12_24 = H24;
+                            datetime_current.AMPM = AM;
+                            ds1302_write_datetime (&datetime_current);
+                            datetime_corr = datetime_current;
+                            ds1302_write_datetime_to_ram (0, &datetime_corr);
 
                             daily_corr.AMPM = uart_str[14];
                             daily_corr.sec = uart_str_get_int (15, 2);
@@ -622,20 +623,20 @@ int main (void)
                         }
                         else
                         {
-                            datetime_current->hour = uart_str_get_int (5, 2);
-                            if (datetime_current->hour > 23)
-                                datetime_current->hour = 23;
-                            datetime_current->min = uart_str_get_int (8, 2);
-                            if (datetime_current->min > 59)
-                                datetime_current->min =59;
-                            datetime_current->sec = uart_str_get_int (11, 2);
-                            if (datetime_current->sec > 59)
-                                datetime_current->sec = 59;
-                            datetime_current->H12_24 = H24;
-                            datetime_current->AMPM = AM;
-                            ds1302_write_datetime (datetime_current);
-                            memcpy (datetime_corr, datetime_current, sizeof (datetime_t));
-                            ds1302_write_datetime_to_ram (0, datetime_corr);
+                            datetime_current.hour = uart_str_get_int (5, 2);
+                            if (datetime_current.hour > 23)
+                                datetime_current.hour = 23;
+                            datetime_current.min = uart_str_get_int (8, 2);
+                            if (datetime_current.min > 59)
+                                datetime_current.min =59;
+                            datetime_current.sec = uart_str_get_int (11, 2);
+                            if (datetime_current.sec > 59)
+                                datetime_current.sec = 59;
+                            datetime_current.H12_24 = H24;
+                            datetime_current.AMPM = AM;
+                            ds1302_write_datetime (&datetime_current);
+                            datetime_corr = datetime_current;
+                            ds1302_write_datetime_to_ram (0, &datetime_corr);
                             uart_ok (1);
                         }
                     }
@@ -875,7 +876,7 @@ int main (void)
                         )
                     {
                         display_mode = SHOW_TIME;
-                        display_time (datetime_current);
+                        display_time (&datetime_current);
                         eeprom_update_byte (EE_ADDR_DISPLAY_MODE, display_mode);
                         uart_ok (1);
                     }
