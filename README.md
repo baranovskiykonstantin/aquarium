@@ -1,66 +1,76 @@
-# Контроллер для аквариума
+# DIY Aquarium Controller
 
-## Описание
-Контроллер предназначен для управления освещением и температурой воды аквариума.<br>
+## Features
+* Controller based on ATMEL microcontroller ATMEGA8A
+   * All settings (except date/time) stored in EEPROM
+* Remote controlling with Bluetooth
+   * Based on HC-05 module
+   * RFCOMM connection type
+   * All possible settings is accessible
+* Available [special app for controlling aquarium settings](https://github.com/baranovskiykonstantin/aquarium-control) from Linux or Android
+* LED lighting
+   * 12V DC output
+   * 400mA max.
+   * Adjustable brightness
+   * Gradual turning on/off (~60 sec.)
+   * Adjustable on/off time
+* Thermostat
+   * 220V AC output
+   * 3A max.
+   * Adjustable min. and max. temperature
+* Water temperature measurement
+   * DS18B20 sensor
+   * Accuracy 0.5 °C
+   * Error detecting
+* On-board RTC
+   * Based on DS1302
+   * Adjustable date/time
+   * Adjustable daily time correction
+* 4-digits LED display
+   * Two modes of displaying: current time and temperature of the water
+   * Modes is switches by capacitive sensor
 
-![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aqua.png)
+## Wiring diagram
+![wiring-diagram](https://raw.github.com/baranovskiykonstantin/aquarium/master/images/wiring-diagram.png)
 
-Конструктивно он состоит из нескольких модулей (платы контроллера, блока питания, Bluetooth модуля), 
-емкостного сенсора для переключения режимов отображения, датчика температуры, нагревателя и светодиодов для освещения.<br>
-Модули контроллера и блока питания спроектированы в САПР KiCAD и изготовляются самостоятельно.<br>
-Модуль Bluetooth используется готовый - HC-05.<br>
-Емкостный сенсор выполнен из прямоугольного отрезка алюминиевого скотча размером 10х50 мм и наклеен с внутренней стороны крышки аквариума над дисплеем. 
-С платой соединяется небольшим отрезком провода.<br>
-В качестве датчика температуры применён интегральный датчик DS18B20 в герметичном исполнении.<br>
-Нагреватель изготовляется самостоятельно из четырех керамических резисторов 470 Ом 5Вт. 
-Они соединяются последовательно, помещаются в пробирку, засыпаются просушенными и просеянным песком, закрываются силиконовым герметиком. 
-Мощность такого нагревателя составляет 25Вт.<br>
-Освещение выполнено из 4 светодиодов мощностью 1Вт, соединённых последовательно.<br>
-Все элементы смонтированы в крышке изготовленной из оргстекла.
+![wiring-diagram](images/wiring-diagram.png)
 
-## Схема
-### Контроллер
-![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-schematic.png)
+1. Capacitive sensor (aluminium scotch 10x50mm)
+2. Mains plug
+3. PCB of aquarium controller
+4. PCB of power supply
+5. Bluetooth module HC-05
+6. LEDs (4 x 1W = 12V 300mA)
+7. Waterproof DS18B20
+8. Heater
 
-### Блок питания
-![schematic](https://raw.github.com/baranovskiykonstantin/aquarium/master/power-schematic.png)
+## HC-05 configuration
+* Indicating mode changing
+   * By default, LED in idle -- blinking, in connecting -- lights on
+   * Disconnect LED2(31) output from PCB's pad and connect to this pad LED1(32) output
+   * Now, LED in idle -- lights off, in connecting -- lights on
+* Restore default settings
+   * Enter to AT-command mode
+   * Send command `AT+ORGL`
+* Set device name
+   * Enter to AT-command mode
+   * Send command `AT+NAME=aquarium`
+* Reduce power consumption (from ~40mA to ~3mA in idle!)
+   * Enter to AT-command mode
+   * Send command `AT+IPSCAN=1024,1,1024,1`
 
-Дисплей работает в двух режимах:<br>
-* отображение времени<br>
-* отображение температуры воды<br>
+## Communicating with controller
+After every command (except `status` command) the controller sends response `OK` if operation was success or `ERROR` on fail.
+Commands must ends with `\n` or `\r\n`. If value of parameter is bigger than allowed will be used max possible value.
 
-Время отображается в формате 24 часов.<br>
-Температура отображается в диапазоне `-55...125`°C. При отключенном датчике отображается `" -- "`.<br>
+### Command `status`
+Get information about current state of aquarium.
 
-## Печатные платы
-### Верх
-![pcb-top](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-top.png)
-
-### Низ
-![pcb-bottom](https://raw.github.com/baranovskiykonstantin/aquarium/master/aquarium-pcb-bottom.png)
-
-Для монтажа дисплея на плату нужно отогнуть выводы под прямым углом наружу.
-
-## Настройка
-Настройка параметров работы выполняется через Bluetooth.<br>
-Параметры соединения: `9600 8-N-1`.
-
-Передача параметров выполняется с помощью команд. Все команды (кроме команды `status`) возвращают в качестве 
-ответа `OK` или `ERROR` в случае успеха или неудачи соответственно. Каждая команда должна завершаться символом новой 
-строки `\n`, или возврата каретки и новой строки `\r\n`. Если переданное значение параметра превысит допустимое 
-значение, будет установлено максимально позволенное.
-
-Параметры термостата и таймера освещения хранятся в энергонезависимой памяти микроконтроллера. 
-Параметры даты и времени - в регистрах микросхемы часов реального времени.
-
-### Команда `status`
-Вывод текущего состояния контроллера.
-
-Формат:
+Format:
 
 `status`
 
-Ответ:
+Answer:
 
 `Date: 01.01.2017 Friday`<br>
 `Time: 13:29:59 (-3 sec at 12:00:00)`<br>
@@ -69,158 +79,158 @@
 `Light: ON manual (10:00:00-20:00:00) 50%`<br>
 `Display: time`
 
-Описание:
+Meaning:
 
-Строка 1: текущая дата и день недели;<br>
-Строка 2: текущее время и информация о суточной коррекции времени;<br>
-Строка 3: текущая температуры воды (°C);<br>
-Строка 4: состояние термостата:<br>
-* `ON` - нагреватель включен, `OFF` - нагреватель выключен
-* `auto` - автоматический режим работы, `manual` - ручной режим работы
-* в скобка указан диапазон температуры, поддерживаемый в автоматическом режиме<br>
+Line 1: current date and day of week;<br>
+Line 2: current time and info about daily time correction;<br>
+Line 3: temperature of the water (°C);<br>
+Line 4: thermostat status:<br>
+* `ON` - heater is on, `OFF` - heater is off
+* `auto` - automatic mode, `manual` - manual mode
+* value in the bracket indicates the temperature range supported in the automatic mode <br>
 
-Строка 5: состояние освещения:<br>
-* `ON` - свет включен, `OFF` - свет выключен
-* `auto` - автоматический режим работы, `manual` - ручной режим работы
-* в скобка указан период времени, в течении которого свет включен в автоматическом режиме
-* в конце указан уровень яркости в процентах
+Line 5: lighting status:<br>
+* `ON` - light is on, `OFF` - light is off
+* `auto` - automatic mode, `manual` - manual mode
+* value in the bracket indicates the period of time during which the light is switched on in automatic mode<br>
+* at the end, the brightness level in percent
 
-Строка 5: режим работы дисплея (`time` - отображение времени, `temp` - отображение температуры)
+Line 6: display mode (`time` - current time shows, `temp` - temperature of the water shows)
 
-### Команда `date`
-Установка параметров даты.
+### Command `date`
+Set date.
 
-Формат:
+Format:
 
 `date DD.MM.YY W`
 
-Параметры:<br>
-* `DD` - день месяца (01-31)
-* `MM` - месяц (01-12)
-* `YY` - год (00-99)
-* `W` - день недели (1 - понедельник ... 7 - воскресенье)
+Parameters:<br>
+* `DD` - day of month (01-31)
+* `MM` - month (01-12)
+* `YY` - year (00-99)
+* `W` - day of week (1 - Monday ... 7 - Sunday)
 
-Ответ:
+Answer:
 
-`OK` или `ERROR`
+`OK` or `ERROR`
 
-### Команда `time`
-Установка параметров времени.
+### Command `time`
+Set time and/or time correction
 
-Формат 1:
+Format 1:
 
 `time HH:MM:SS`
 
-Параметры:<br>
-* `HH` - часы (00-23)
-* `MM` - минуты (00-59)
-* `SS` - секунды (00-59)
+Parameters:<br>
+* `HH` - hours (00-23)
+* `MM` - minutes (00-59)
+* `SS` - seconds (00-59)
 
-Формат 2:
+Format 2:
 
 `time +CC`<br>
 `time -CC`
 
-Параметры:<br>
-* `+` или `-` - прибавить или отнять поправку времени
-* `CC` - секунды коррекции времени (00-59)
+Parameters:<br>
+* `+` or `-` - increase or decrease time correction value
+* `CC` - time correction in seconds (00-59)
 
-Формат 3:
+Format 3:
 
 `time HH:MM:SS +CC`<br>
 `time HH:MM:SS -CC`
 
-Параметры:<br>
-* `HH` - часы (00-23)
-* `MM` - минуты (00-59)
-* `SS` - секунды (00-59)
-* `+` или `-` - прибавить или отнять поправку времени
-* `CC` - секунды коррекции времени (00-59)
+Parameters:<br>
+* `HH` - hours (00-23)
+* `MM` - minutes (00-59)
+* `SS` - seconds (00-59)
+* `+` or `-` - increase or decrease time correction value
+* `CC` - time correction in seconds (00-59)
 
-Ответ:
+Answer:
 
-`OK` или `ERROR`
+`OK` or `ERROR`
 
-### Команда `heat`
-Параметры термостата.
+### Command `heat`
+Heater setup.
 
-Формат 1:
+Format 1:
 
 `heat LL-HH`
 
-Параметры:<br>
-* `LL` - нижний предел температуры воды, ниже которого будет включен нагреватель в автоматическом режиме (00-99)
-* `HH` - верхний предел температуры воды, выше которого будет выключен нагреватель в автоматическом режиме (00-99)
+Parameters:<br>
+* `LL` - minimal temperature (00-99)
+* `HH` - maximal temperature (00-99)
 
-Формат 2:
+Format 2:
 
 `heat on`<br>
 `heat off`<br>
 `heat auto`<br>
 
-Параметры:<br>
-* `on` - перейти в ручной режим работы и включить нагреватель
-* `off` - перейти в ручной режим работы и выключить нагреватель
-* `auto` - перейти в автоматический режим работы
+Parameters:<br>
+* `on` - switch to manual mode and turn on heater
+* `off` - switch to manual mode and turn off heater
+* `auto` - switch to automatic mode
 
-Ответ:
+Answer:
 
-`OK` или `ERROR`
+`OK` or `ERROR`
 
-### Команда `light`
-Параметры таймера освещения.
+### Command `light`
+Lighting setup.
 
-Формат 1:
+Format 1:
 
 `light H1:M1:S1-H2:M2:S2`
 
-Параметры:<br>
-* `H1:M1:S1` - время включения освещения в автоматическом режиме (00:00:00-23:59:59)
-* `H2:M2:S2` - время выключения освещения в автоматическом режиме (00:00:00-23:59:59)
+Parameters:<br>
+* `H1:M1:S1` - time of turn on light (00:00:00-23:59:59)
+* `H2:M2:S2` - time of turn off light (00:00:00-23:59:59)
 
-Формат 2:
+Format 2:
 
 `light on`<br>
 `light off`<br>
 `light auto`<br>
 
-Параметры:<br>
-* `on` - перейти в ручной режим работы и включить свет
-* `off` - перейти в ручной режим работы и выключить свет
-* `auto` - перейти в автоматический режим работы
+Parameters:<br>
+* `on` - switch to manual mode and turn on light
+* `off` - switch to manual mode and turn off light
+* `auto` - switch to automatic mode
 
-Формат 3:
+Format 3:
 
 `light level XXX`
 
-Параметры:<br>
-* `XXX` - уровень яркости освещения (000-100)
+Parameters:<br>
+* `XXX` - brightness level (000-100)
 
-Формат 4:
+Format: 4:
 
 `light H1:M1:S1-H2:M2:S2 XXX`
 
-Параметры:<br>
-* `H1:M1:S1` - время включения освещения в автоматическом режиме (00:00:00-23:59:59)
-* `H2:M2:S2` - время выключения освещения в автоматическом режиме (00:00:00-23:59:59)
-* `XXX` - уровень яркости освещения (000-100)
+Parameters:<br>
+* `H1:M1:S1` - time of turn on light (00:00:00-23:59:59)
+* `H2:M2:S2` - time of turn off light (00:00:00-23:59:59)
+* `XXX` - brightness level (000-100)
 
-Ответ:
+Answer:
 
-`OK` или `ERROR`
+`OK` or `ERROR`
 
-### Команда `display`
-Параметры отображения информации на дисплее.
+### Command `display`
+Display setup.
 
-Формат:
+Format:
 
 `display time`<br>
 `display temp`
 
-Параметры:<br>
-* `time` - отображать на дисплее текущее время
-* `temp` - отображать на дисплее текущую температуру воды
+Parameters:<br>
+* `time` - to show current time
+* `temp` - to show current temperature of the water
 
-Ответ:
+Answer:
 
-`OK` или `ERROR`
+`OK` or `ERROR`
