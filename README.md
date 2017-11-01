@@ -33,8 +33,6 @@
 ## Wiring diagram
 ![wiring-diagram](https://raw.github.com/baranovskiykonstantin/aquarium/master/images/wiring-diagram.png)
 
-![wiring-diagram](images/wiring-diagram.png)
-
 1. Capacitive sensor (aluminium scotch 10x50mm)
 2. Mains plug
 3. PCB of aquarium controller
