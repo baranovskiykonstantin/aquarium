@@ -329,7 +329,7 @@ int main (void)
             temp_tmp = ds18b20_gettemp ();
             if (temp_tmp == DS18B20_ERR)
             {
-                if (temp_fail_counter++)
+                if (temp_fail_counter++ > 3)
                 {
                     temp_value = temp_tmp;
                     temp_fail_counter = 0;
