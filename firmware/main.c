@@ -47,6 +47,7 @@
 #define EE_ADDR_DISPLAY_MODE (uint8_t *)12
 
 #define EE_ADDR_LIGHT_TOP_LEVEL (uint8_t *)13
+#define EE_ADDR_LIGHT_RISE_TIME (uint8_t *)14
 
 /*
  * I/O configuration
@@ -225,6 +226,7 @@ int main (void)
     temp_h = eeprom_read_byte (EE_ADDR_TEMP_H);
 
     pwm_top_level = eeprom_read_byte (EE_ADDR_LIGHT_TOP_LEVEL);
+    rise_time = eeprom_read_byte (EE_ADDR_LIGHT_RISE_TIME);
 
     time_on.hour = eeprom_read_byte (EE_ADDR_TIME_ON_HOUR);
     time_on.min = eeprom_read_byte (EE_ADDR_TIME_ON_MIN);
@@ -531,6 +533,9 @@ int main (void)
                         uart_putc (' ');
                         uart_puti (pwm_top_level, 0);
                         uart_putc ('%');
+                        uart_putc (' ');
+                        uart_puti (rise_time, 0);
+                        uart_puts ("min");
                         uart_puts ("\r\nDisplay: ");
                         switch (display_mode)
                         {
@@ -744,7 +749,10 @@ int main (void)
                         if (uart_str[23] == ' ' &&
                             chr_is_digit (uart_str[24]) &&
                             chr_is_digit (uart_str[25]) &&
-                            chr_is_digit (uart_str[26])
+                            chr_is_digit (uart_str[26]) &&
+                            uart_str[27] == ' ' &&
+                            chr_is_digit (uart_str[28]) &&
+                            chr_is_digit (uart_str[29])
                             )
                         {
                             time_on.hour = uart_str_get_int (6, 2);
@@ -775,8 +783,14 @@ int main (void)
                             pwm_top_level = uart_str_get_int (24, 3);
                             if (pwm_top_level > 100)
                                 pwm_top_level = 100;
-                            pwm_update_level ();
                             eeprom_update_byte (EE_ADDR_LIGHT_TOP_LEVEL, pwm_top_level);
+
+                            rise_time = uart_str_get_int (28, 2);
+                            if (rise_time > 30)
+                                rise_time = 30;
+                            eeprom_update_byte (EE_ADDR_LIGHT_RISE_TIME, rise_time);
+
+                            pwm_update_level ();
                             uart_ok (1);
                         }
                         else
@@ -852,6 +866,22 @@ int main (void)
                             pwm_top_level = 100;
                         pwm_update_level ();
                         eeprom_update_byte (EE_ADDR_LIGHT_TOP_LEVEL, pwm_top_level);
+                        uart_ok (1);
+                    }
+                    else if (uart_str[6]  == 'r' &&
+                             uart_str[7]  == 'i' &&
+                             uart_str[8]  == 's' &&
+                             uart_str[9]  == 'e' &&
+                             uart_str[10] == ' ' &&
+                             chr_is_digit (uart_str[11]) &&
+                             chr_is_digit (uart_str[12])
+                             )
+                    {
+                        rise_time = uart_str_get_int (11, 2);
+                        if (rise_time > 30)
+                            rise_time = 30;
+                        pwm_update_level ();
+                        eeprom_update_byte (EE_ADDR_LIGHT_RISE_TIME, rise_time);
                         uart_ok (1);
                     }
                     else

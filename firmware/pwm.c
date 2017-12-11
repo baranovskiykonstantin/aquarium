@@ -22,10 +22,15 @@ void pwm_init (void)
 
     /* Timer/Counter 0
      * Increase PWM level every 920 us.
-     * From 0 to 100% in ~60 seconds (65535 * 920us).
+     * From 0 to 100% in ~60 seconds (65535 * 920us):
+     *      TCCR0 = 0x03;               // Prescaler clk/64
+     *      TCNT0 = 0x8d;               // 920 us
+     * From 0 to 100% in ~30 minutes (65535 * 27.52ms):
+     *      TCCR0 = 0x05;               // Prescaler clk/1024
+     *      TCNT0 = 0x29;               // 27.52 ms
      */
-    TCCR0 = 0x03;               // Prescaler clk/64
-    TCNT0 = 0x8c;               // 920 us
+    TCCR0 = 0x05;               // Prescaler clk/1024
+    TCNT0 = 0x29;               // 27.52 ms
     TIMSK |= (1 << TOIE0);      // Enable overflow on timer 0
 
     /* Timer/Counter 1
@@ -38,6 +43,8 @@ void pwm_init (void)
 
     /* Variables
      */
+    rise_time = 1;
+    rise_timer_value = rise_values_for_timer[rise_time];
     pwm_enabled = 0;
     pwm_top_level = 100;
 }
@@ -45,8 +52,34 @@ void pwm_init (void)
 /* ----------------------- Set PWM new top level --------------------------- */
 void pwm_update_level (void)
 {
-    TCNT0 = 0x8c;               // 920 us
-    TIMSK |= (1 << TOIE0);      // Enable PWM's timer
+    uint16_t pwm_level;
+
+    if (rise_time)
+    {
+        // Initialize timer
+        rise_timer_value = rise_values_for_timer[rise_time];
+        TCNT0 = rise_timer_value;
+        // Enable PWM's timer
+        TIMSK |= (1 << TOIE0);
+    }
+    else
+    {
+        TIMSK &= ~(1 << TOIE0);      // Disable PWM's timer
+
+        if (pwm_enabled)
+        {
+            if (pwm_top_level == 100)
+                pwm_level = 0xffff;
+            else
+                pwm_level = pwm_top_level * PWM_STEP;
+        }
+        else
+        {
+            pwm_level = 0;
+        }
+
+        OCR1B = pwm_level;
+    }
 }
 
 /* ------------------------ PWM step up to top ----------------------------- */
@@ -66,11 +99,14 @@ void pwm_disable (void)
 /* ----------- Change PWM level by one step in specified direction --------- */
 ISR (TIMER0_OVF_vect)
 {
-    TCNT0 = 0x8c;
+    TCNT0 = rise_timer_value; // Initialize timer
 
-    uint16_t pwm_level = pwm_top_level * PWM_STEP;
+    uint16_t pwm_level;
+
     if (pwm_top_level == 100)
         pwm_level = 0xffff;
+    else
+        pwm_level = pwm_top_level * PWM_STEP;
 
     if (pwm_enabled)
     {

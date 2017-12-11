@@ -12,7 +12,7 @@
    * 12V DC output
    * 400mA max.
    * Adjustable brightness
-   * Gradual turning on/off (~60 sec.)
+   * Adjustable gradual turning on/off (0-30 min)
    * Adjustable on/off time
 * Thermostat
    * 220V AC output
@@ -74,7 +74,7 @@ Answer:
 `Time: 13:29:59 (-3 sec at 12:00:00)`<br>
 `Temp: 22`<br>
 `Heat: OFF auto (20-22)`<br>
-`Light: ON manual (10:00:00-20:00:00) 50%`<br>
+`Light: ON manual (10:00:00-20:00:00) 50% 10min`<br>
 `Display: time`
 
 Meaning:
@@ -91,7 +91,7 @@ Line 5: lighting status:<br>
 * `ON` - light is on, `OFF` - light is off
 * `auto` - automatic mode, `manual` - manual mode
 * value in the bracket indicates the period of time during which the light is switched on in automatic mode<br>
-* at the end, the brightness level in percent
+* at the end, the brightness level in percentage and light rising time in minutes
 
 Line 6: display mode (`time` - current time shows, `temp` - temperature of the water shows)
 
@@ -202,16 +202,28 @@ Format 3:
 `light level XXX`
 
 Parameters:<br>
-* `XXX` - brightness level (000-100)
+* `XXX` - brightness level in percentage (000-100)
 
 Format: 4:
 
-`light H1:M1:S1-H2:M2:S2 XXX`
+`light rise YY`
+
+Parameters:<br>
+* `YY` - time of the light rising in minutes (00-30)
+
+NOTE: Specified time actual for brightness 100%. This means, that for the
+light rising time in 10 minutes with brightness 50% the real rise time will be
+5 minutes.
+
+Format: 5:
+
+`light H1:M1:S1-H2:M2:S2 XXX YY`
 
 Parameters:<br>
 * `H1:M1:S1` - time of turn on light (00:00:00-23:59:59)
 * `H2:M2:S2` - time of turn off light (00:00:00-23:59:59)
 * `XXX` - brightness level (000-100)
+* `YY` - light rising time (00-30)
 
 Answer:
 
