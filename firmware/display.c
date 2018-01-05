@@ -16,8 +16,51 @@
 #include "ds18b20.h"
 #include "ds1302.h"
 
+static volatile uint8_t display[4];             // Symbols that must be shown
+static volatile uint8_t current_digit;          // Current digit
+static volatile uint8_t current_segment;        // Current segment
+
+typedef struct {
+    volatile uint8_t *port;
+    uint8_t pin;
+} pin_t;
+
+static const pin_t digits[4] = {
+    {&PORTB, PB1}, // 1
+    {&PORTC, PC5}, // 2
+    {&PORTC, PC4}, // 3
+    {&PORTC, PC3}  // 4
+};
+
+static const pin_t segments[8] = {
+    {&PORTD, PD4}, // A
+    {&PORTD, PD2}, // B
+    {&PORTD, PD7}, // C
+    {&PORTD, PD5}, // D
+    {&PORTB, PB7}, // E
+    {&PORTD, PD3}, // F
+    {&PORTB, PB0}, // G
+    {&PORTD, PD6}  // H
+};
+
+static const uint8_t symbols[] = {
+    //HGFEDCBA
+    0b00111111,   // 0  - 0
+    0b00000110,   // 1  - 1
+    0b01011011,   // 2  - 2
+    0b01001111,   // 3  - 3
+    0b01100110,   // 4  - 4
+    0b01101101,   // 5  - 5
+    0b01111101,   // 6  - 6
+    0b00000111,   // 7  - 7
+    0b01111111,   // 8  - 8
+    0b01101111,   // 9  - 9
+    0b01100011,   // 10 - degr.
+    0b00111001,   // 11 - C
+    };
+
 /* ------------------------- Initialize the display ------------------------ */
-void display_init (void)
+void display_init(void)
 {
     /* I/O ports
      */
@@ -45,7 +88,7 @@ void display_init (void)
 }
 
 /* ---------------------- Shows the value of the time ---------------------- */
-void display_time (datetime_t *datetime)
+void display_time(datetime_t *datetime)
 {
     display[0] = symbols[datetime->min % 10];
     display[1] = symbols[datetime->min / 10];
@@ -54,25 +97,21 @@ void display_time (datetime_t *datetime)
         display[3] = 0;
     else
         display[3] = symbols[datetime->hour / 10];
-    if (datetime->sec % 2)
-    {
+    if (datetime->sec % 2) {
         display[0] |= 0x80;
         display[1] |= 0x80;
     }
 }
 
 /* ------------------ Shows the value of the temperature ------------------- */
-void display_temp (int8_t value)
+void display_temp(int8_t value)
 {
-    if (value == DS18B20_ERR)
-    {
+    if (value == DS18B20_ERR) {
         display[0] = 0;
         display[1] = 0x40;
         display[2] = 0x40;
         display[3] = 0;
-    }
-    else if (labs(value) < 10)
-    {
+    } else if (labs(value) < 10) {
         display[0] = 0;
         display[1] = symbols[labs(value)];
         if (value < 0)
@@ -80,9 +119,7 @@ void display_temp (int8_t value)
         else
             display[2] = 0;
         display[3] = 0;
-    }
-    else if (labs(value) < 100)
-    {
+    } else if (labs(value) < 100) {
         display[0] = 0;
         display[1] = symbols[labs(value) % 10];
         display[2] = symbols[labs(value) / 10];
@@ -90,9 +127,7 @@ void display_temp (int8_t value)
             display[3] = 0x40;
         else
             display[3] = 0;
-    }
-    else
-    {
+    } else {
         display[0] = symbols[labs(value) % 10];
         display[1] = symbols[labs(value) % 100 / 10];
         display[2] = symbols[labs(value) % 1000 / 100];
@@ -105,8 +140,8 @@ ISR (TIMER2_OVF_vect)
 {
     uint8_t i;
 
-    // Increase timer of temperature measurement
-    ds18b20_timer++;
+    // Decrease timer of temperature measurement
+    ds18b20_decrease_timer();
 
     // Turn off all digits
     for (i=0; i < 4; i++)
@@ -123,11 +158,11 @@ ISR (TIMER2_OVF_vect)
     // Turn on current digit
     *(digits[current_digit].port) |= (1<<digits[current_digit].pin);
 
-    if (++current_segment > 7)                // All segments 0..7
-    {
+    if (++current_segment > 7) {
         current_segment = 0;
-        if (++current_digit > 3)              // All digits 0..3
+        if (++current_digit > 3) {
             current_digit = 0;
-    }
+        } // All digits 0..3
+    } // All segments 0..7
 }
 

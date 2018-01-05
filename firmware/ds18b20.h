@@ -13,11 +13,11 @@
 
 #include <avr/io.h>
 
-// status
+// Status
 #define DS18B20_BUSY 126
 #define DS18B20_ERR 127
 
-//setup connection
+// Setup connection
 #define DS18B20_PORT PORTC
 #define DS18B20_DDR DDRC
 #define DS18B20_PIN PINC
@@ -28,7 +28,7 @@
 #define DS18B20_PWR_OFF PORTC &= ~(1 << PC1)
 #define DS18B20_PWR_STATE (PINC & (1 << PC1)) >> PC1
 
-//commands
+// Commands
 #define DS18B20_CMD_CONVERTTEMP 0x44
 #define DS18B20_CMD_RSCRATCHPAD 0xbe
 #define DS18B20_CMD_WSCRATCHPAD 0x4e
@@ -41,14 +41,14 @@
 #define DS18B20_CMD_SKIPROM 0xcc
 #define DS18B20_CMD_ALARMSEARCH 0xec
 
-//conversion resolutions
+// Conversion resolutions
 #define DS18B20_RES_09 0x1f
 #define DS18B20_RES_10 0x3f
 #define DS18B20_RES_11 0x5f
 #define DS18B20_RES_12 0x7f
 #define DS18B20_RES DS18B20_RES_09
 
-//scratchpad
+// Scratchpad
 #define SCRATCHPAD_SIZE 9
 #define SCRATCHPAD_TEMP_L 0
 #define SCRATCHPAD_TEMP_H 1
@@ -58,10 +58,9 @@
 /* 5-7 reserved */
 #define SCRATCHPAD_CRC 8
 
-//time counter
-volatile uint16_t ds18b20_timer;
-uint8_t ds18b20_convert_flag;
-//functions
-extern int8_t ds18b20_gettemp();
+// Functions
+extern int8_t ds18b20_gettemp(void);
+extern void ds18b20_hard_reset(void);
+extern void ds18b20_decrease_timer(void);
 
 #endif /* __DS18B20_H_INCLUDED__ */

@@ -49,16 +49,14 @@ typedef struct
     uint8_t     year;
     } datetime_t;
 
-const static uint8_t days_in_month[] = {0, 31, 28, 31,30,31,30,31,31,30,31,30,31};
-
 /*
  * Add the time to the datetime.
  */
-void datetime_add_time (datetime_t *datetime, time_t *time);
+extern void datetime_add_time(datetime_t *datetime, time_t *time);
 
 /*
  * Subtract the time from the datetime.
  */
-void datetime_sub_time (datetime_t *datetime, time_t *time);
+extern void datetime_sub_time(datetime_t *datetime, time_t *time);
 
 #endif /* __DATETIME_H_INCLUDED__ */

@@ -16,12 +16,14 @@
 #define SENSOR_1    0x06    // Channel for sensor 1 - ADC6
 #define SENSOR_2    0x07    // Channel for sensor 2 - ADC7
 
-/* Initialize the ADC for measuring level of the sensor output.
+/*
+ * Initialize the ADC for measuring level of the sensor output.
  */
-extern void adc_init (void);
+extern void adc_init(void);
 
-/* Measure specific sensor.
+/*
+ * Measure specific sensor.
  */
-extern uint8_t get_sensor_state (uint8_t channel);
+extern uint8_t get_sensor_state(uint8_t channel);
 
 #endif /* __ADC_H_INCLUDED__ */

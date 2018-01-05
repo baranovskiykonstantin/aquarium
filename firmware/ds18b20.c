@@ -16,14 +16,19 @@
 #include "crc8.h"
 
 /*
+ * variable decreases every 256 us by Timer2
+ */
+static uint16_t timer = 0;
+
+/*
  * ds18b20 init
  */
-uint8_t ds18b20_reset ()
+uint8_t ds18b20_reset()
 {
     uint8_t i;
 
     //low for 480us
-    DS18B20_PORT &= ~ (1<<DS18B20_DQ); //low
+    DS18B20_PORT &= ~(1<<DS18B20_DQ); //low
     DS18B20_DDR |= (1<<DS18B20_DQ); //output
     sei();
     _delay_us(480);
@@ -46,10 +51,10 @@ uint8_t ds18b20_reset ()
 /*
  * write one bit
  */
-void ds18b20_writebit (uint8_t bit)
+void ds18b20_writebit(uint8_t bit)
 {
     //low for 1uS
-    DS18B20_PORT &= ~ (1<<DS18B20_DQ); //low
+    DS18B20_PORT &= ~(1<<DS18B20_DQ); //low
     DS18B20_DDR |= (1<<DS18B20_DQ); //output
     _delay_us(1);
 
@@ -67,12 +72,12 @@ void ds18b20_writebit (uint8_t bit)
 /*
  * read one bit
  */
-uint8_t ds18b20_readbit (void)
+uint8_t ds18b20_readbit(void)
 {
-    uint8_t bit=0;
+    uint8_t bit = 0;
 
     //low for 1uS
-    DS18B20_PORT &= ~ (1<<DS18B20_DQ); //low
+    DS18B20_PORT &= ~(1<<DS18B20_DQ); //low
     DS18B20_DDR |= (1<<DS18B20_DQ); //output
     _delay_us(1);
 
@@ -82,7 +87,7 @@ uint8_t ds18b20_readbit (void)
 
     //read the value
     if (DS18B20_PIN & (1<<DS18B20_DQ))
-        bit=1;
+        bit = 1;
 
     //wait 45uS and return read value
     sei();
@@ -94,11 +99,11 @@ uint8_t ds18b20_readbit (void)
 /*
  * write one byte
  */
-void ds18b20_writebyte (uint8_t byte)
+void ds18b20_writebyte(uint8_t byte)
 {
     uint8_t i;
     for (i=8; i>0; i--){
-        ds18b20_writebit(byte&1);
+        ds18b20_writebit(byte & 1);
         byte >>= 1;
     }
 }
@@ -106,55 +111,56 @@ void ds18b20_writebyte (uint8_t byte)
 /*
  * read one byte
  */
-uint8_t ds18b20_readbyte (void)
+uint8_t ds18b20_readbyte(void)
 {
-    uint8_t i, n=0;
+    uint8_t i;
+    uint8_t n=0;
     for (i=8; i>0; i--){
         n >>= 1;
-        n |= (ds18b20_readbit()<<7);
+        n |= (ds18b20_readbit() << 7);
     }
     return n;
 }
 
 /*
- * get temperature
+ * Decrease timer
  */
-int8_t ds18b20_gettemp ()
+void ds18b20_decrease_timer(void)
+{
+    if (timer > 0)
+        timer--;
+}
+
+/*
+ * Hard reset
+ */
+void ds18b20_hard_reset(void)
+{
+    DS18B20_PWR_OFF;
+    _delay_ms(10);
+    DS18B20_PWR_ON;
+    _delay_ms(10);
+    timer = 0;
+}
+
+/*
+ * Get temperature
+ */
+int8_t ds18b20_gettemp(void)
 {
     uint8_t scratchpad[SCRATCHPAD_SIZE];
     uint8_t i;
     double temp_value = DS18B20_ERR;
-    uint16_t convert_time;
 
-    if (ds18b20_convert_flag)
-    {
-        // time for conversion
-        // time counts by timer2 (see display.c)
-        switch (DS18B20_RES)
-        {
-            // 368 * 256us = 94ms
-            case DS18B20_RES_09: convert_time = 368; break;
-            // 735 * 256us = 188ms
-            case DS18B20_RES_10: convert_time = 735; break;
-            // 1465 * 256us = 375ms
-            case DS18B20_RES_11: convert_time = 1465; break;
-            // 2930 * 256us = 750ms
-            case DS18B20_RES_12: convert_time = 2930; break;
-        }
-
-        if (ds18b20_timer > convert_time)
-            ds18b20_convert_flag = 0;
-
+    if (timer > 0) {
+        /* Converting not finished -- wait */
         return DS18B20_BUSY;
-    }
-    else
-    {
+    } else {
         /* Read value of the measured temperature */
 
         cli();
         // reset
-        if (ds18b20_reset())
-        {
+        if (ds18b20_reset()) {
             sei();
             return DS18B20_ERR;
         }
@@ -175,8 +181,7 @@ int8_t ds18b20_gettemp ()
 
         cli();
         // reset
-        if (ds18b20_reset())
-        {
+        if (ds18b20_reset()) {
             sei();
             return DS18B20_ERR;
         }
@@ -185,12 +190,11 @@ int8_t ds18b20_gettemp ()
         ds18b20_writebyte(DS18B20_RES); //conversion resolution
 
         sei();
-        _delay_ms (1); // Update display
+        _delay_ms(1); // Update display
         cli();
 
         // reset
-        if (ds18b20_reset())
-        {
+        if (ds18b20_reset()) {
             sei();
             return DS18B20_ERR;
         }
@@ -198,8 +202,18 @@ int8_t ds18b20_gettemp ()
         ds18b20_writebyte(DS18B20_CMD_CONVERTTEMP); //start temperature conversion
         sei();
 
-        ds18b20_timer = 0;
-        ds18b20_convert_flag = 1;
+        // time for conversion
+        // time counts by timer2 (see display.c)
+        switch (DS18B20_RES) {
+        // 368 * 256us = 94ms
+        case DS18B20_RES_09: timer = 368; break;
+        // 735 * 256us = 188ms
+        case DS18B20_RES_10: timer = 735; break;
+        // 1465 * 256us = 375ms
+        case DS18B20_RES_11: timer = 1465; break;
+        // 2930 * 256us = 750ms
+        case DS18B20_RES_12: timer = 2930; break;
+        }
 
         return (uint8_t)temp_value;
     }

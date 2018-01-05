@@ -12,16 +12,15 @@
 #include <avr/io.h>
 
 /* ------------------------ Initialize the ADC ----------------------------- */
-void adc_init (void)
+void adc_init(void)
 {
-    /* Registers
-     */
-    ADCSRA |= (1 << ADEN);          // Enable ADC
+    // Registers
+    ADCSRA |= (1 << ADEN);               // Enable ADC
     ADCSRA |= (1 << ADPS1 | 1 << ADPS2); // ADC prescaler /64
 }
 
 /* ------------- Convert analog value to the logical state ----------------- */
-uint8_t get_sensor_state (uint8_t channel)
+uint8_t get_sensor_state(uint8_t channel)
 {
     ADMUX &= 0xf0;                      // Reset channel to default
     ADMUX |= channel;                   // Set channel for measurement

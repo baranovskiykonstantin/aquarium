@@ -33,36 +33,36 @@
 /*
  * Initialize the peripherals to work with ds1302
  */
-void ds1302_init ();
+extern void ds1302_init(void);
 
 /*
  * Read date and time
  */
-void ds1302_read_datetime (datetime_t *datetime);
+extern void ds1302_read_datetime(datetime_t *datetime);
 
 /*
  * Write date and time
  */
-void ds1302_write_datetime (datetime_t *datetime);
+extern void ds1302_write_datetime(datetime_t *datetime);
 
 /*
  * Read byte from RAM
  */
-uint8_t ds1302_read_byte_from_ram (uint8_t offset);
+extern uint8_t ds1302_read_byte_from_ram(uint8_t offset);
 
 /*
  * Write byte to RAM
  */
-void ds1302_write_byte_to_ram (uint8_t offset, uint8_t value);
+extern void ds1302_write_byte_to_ram(uint8_t offset, uint8_t value);
 
 /*
  * Read date and time from RAM
  */
-void ds1302_read_datetime_from_ram (uint8_t offset, datetime_t *datetime);
+extern void ds1302_read_datetime_from_ram(uint8_t offset, datetime_t *datetime);
 
 /*
  * Write date and time to RAM
  */
-void ds1302_write_datetime_to_ram (uint8_t offset, datetime_t *datetime);
+extern void ds1302_write_datetime_to_ram(uint8_t offset, datetime_t *datetime);
 
 #endif /* __DS1302_H_INCLUDED__ */
