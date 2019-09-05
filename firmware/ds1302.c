@@ -3,47 +3,51 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2015-12-28
  * Tabsize: 4
- * Copyright: (c) 2017 Baranovskiy Konstantin
+ * Copyright: (c) 2017-2019 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
- * This Revision: 1
  */
+
+#include <util/delay.h>
 
 #include "ds1302.h"
 
-uint8_t ds1302_bin8_to_bcd(uint8_t data)
+__attribute__((noinline)) static uint8_t bin8_to_bcd(uint8_t bin8)
 {
-    uint8_t hpart;
-    uint8_t lpart;
+    uint8_t bcd;
 
-    hpart = data / 10;
-    lpart = data % 10;
+    bcd = (bin8 / 10) << 4;
+    bcd |= bin8 % 10;
 
-    return ((hpart << 4) | lpart);
+    return bcd;
 }
 
-uint8_t ds1302_bcd_to_bin8(uint8_t data)
+__attribute__((noinline)) static uint8_t bcd_to_bin8(uint8_t bcd)
 {
-    uint8_t hpart;
-    uint8_t lpart;
+    uint8_t bin8;
 
-    hpart = ((data >> 4) & 0b00000111);
-    lpart = data & 0x0F;
-    data = hpart*10 + lpart;
-    return data;
+    bin8 = (bcd >> 4) * 10;
+    bin8 += bcd & 0b00001111;
+
+    return bin8;
 }
 
-void ds1302_write(uint8_t cmd)
+static void write_byte(uint8_t byte)
 {
     uint8_t i;
+
     DS1302_SCLK_CLR;
     DS1302_CE_SET;
     DS1302_IO_AS_OUT;
-    for (i=0; i<8; i++) {
+    for (i = 0; i < 8; i++)
+    {
         DS1302_SCLK_CLR;
         _delay_us(1);
-        if (cmd & (1 << i)) {
+        if (byte & (1 << i))
+        {
             DS1302_IO_SET;
-        } else {
+        }
+        else
+        {
             DS1302_IO_CLR;
         }
         DS1302_SCLK_SET;
@@ -51,34 +55,39 @@ void ds1302_write(uint8_t cmd)
     }
 }
 
-uint8_t ds1302_read()
+static uint8_t read_byte(void)
 {
-    uint8_t readbyte;
+    uint8_t byte = 0;
     uint8_t i;
-    readbyte = 0;
+
     DS1302_IO_AS_IN;
     DS1302_IO_SET; // Enable pull-up res.
-    for (i=0; i<8; i++) {
+    for (i = 0; i < 8; i++)
+    {
         DS1302_SCLK_CLR;
-        if (DS1302_IO_GET) {
-            readbyte |= (1 << i);
-        } else {
-            readbyte &= ~(1 << i);
+        if (DS1302_IO_GET)
+        {
+            byte |= (1 << i);
+        }
+        else
+        {
+            byte &= ~(1 << i);
         }
         _delay_us(1);
         DS1302_SCLK_SET;
         _delay_us(1);
     }
-    return readbyte;
+
+    return byte;
 }
 
-void ds1302_end_data_transfer()
+static void finish(void)
 {
     DS1302_CE_CLR;
     DS1302_SCLK_CLR;
 }
 
-void ds1302_init()
+void ds1302_init(void)
 {
     DS1302_CE_AS_OUT;
     DS1302_CE_CLR;
@@ -90,141 +99,130 @@ void ds1302_init()
 void ds1302_read_datetime(datetime_t *datetime)
 {
     // read seconds
-    ds1302_write(0x81);
-    datetime->sec = ds1302_bcd_to_bin8(ds1302_read());
-    ds1302_end_data_transfer();
+    write_byte(0x81);
+    datetime->sec = bcd_to_bin8(read_byte());
+    finish();
     // read minutes
-    ds1302_write(0x83);
-    datetime->min = ds1302_bcd_to_bin8(ds1302_read());
-    ds1302_end_data_transfer();
+    write_byte(0x83);
+    datetime->min = bcd_to_bin8(read_byte());
+    finish();
     // read hour
-    ds1302_write(0x85);
-    datetime->hour = ds1302_read();
-    ds1302_end_data_transfer();
+    write_byte(0x85);
+    datetime->hour = read_byte();
+    finish();
     datetime->AMPM = (datetime->hour & 0b00100000);
     datetime->H12_24 = (datetime->hour & 0b10000000);
-    if (datetime->H12_24 == H12) {
+    if (datetime->H12_24 == H12)
+    {
         datetime->hour = datetime->hour & 0b00011111;
-    } else {
+    }
+    else
+    {
         datetime->hour = datetime->hour & 0b00111111;
     }
-    datetime->hour = ds1302_bcd_to_bin8(datetime->hour);
+    datetime->hour = bcd_to_bin8(datetime->hour);
     // read day
-    ds1302_write(0x87);
-    datetime->day = ds1302_bcd_to_bin8(ds1302_read());
-    ds1302_end_data_transfer();
+    write_byte(0x87);
+    datetime->day = bcd_to_bin8(read_byte());
+    finish();
     // read month
-    ds1302_write(0x89);
-    datetime->month = ds1302_bcd_to_bin8(ds1302_read());
-    ds1302_end_data_transfer();
+    write_byte(0x89);
+    datetime->month = bcd_to_bin8(read_byte());
+    finish();
     // read weekday
-    ds1302_write(0x8B);
-    datetime->weekday=ds1302_read();
-    ds1302_end_data_transfer();
+    write_byte(0x8B);
+    datetime->weekday=read_byte();
+    finish();
     // read year
-    ds1302_write(0x8D);
-    datetime->year = ds1302_bcd_to_bin8(ds1302_read());
-    ds1302_end_data_transfer();
+    write_byte(0x8D);
+    datetime->year = bcd_to_bin8(read_byte());
+    finish();
 }
 
 void ds1302_write_datetime(datetime_t *datetime)
 {
-    uint8_t tmp;
     // disable write protection
-    ds1302_write(0x8e);
-    ds1302_write(0x00);
-    ds1302_end_data_transfer();
-    // set seconds (with cleared CLOCK HALF FLAG)
-    ds1302_write(0x80);
-    ds1302_write(ds1302_bin8_to_bcd(datetime->sec) & 0x7f);
-    ds1302_end_data_transfer();
+    write_byte(0x8e);
+    write_byte(0x00);
+    finish();
+    // set seconds
+    write_byte(0x80);
+    write_byte(bin8_to_bcd(datetime->sec));
+    finish();
     // set minutes
-    ds1302_write(0x82);
-    ds1302_write(ds1302_bin8_to_bcd(datetime->min));
-    ds1302_end_data_transfer();
+    write_byte(0x82);
+    write_byte(bin8_to_bcd(datetime->min));
+    finish();
     // set hour
-    tmp =(ds1302_bin8_to_bcd(datetime->hour) | datetime->AMPM | datetime->H12_24);
-    ds1302_write(0x84);
-    ds1302_write(tmp);
-    ds1302_end_data_transfer();
+    write_byte(0x84);
+    write_byte(bin8_to_bcd(datetime->hour) | datetime->AMPM | datetime->H12_24);
+    finish();
     // set date
-    ds1302_write(0x86);
-    ds1302_write(ds1302_bin8_to_bcd(datetime->day));
-    ds1302_end_data_transfer();
+    write_byte(0x86);
+    write_byte(bin8_to_bcd(datetime->day));
+    finish();
     // set month
-    ds1302_write(0x88);
-    ds1302_write(ds1302_bin8_to_bcd(datetime->month));
-    ds1302_end_data_transfer();
+    write_byte(0x88);
+    write_byte(bin8_to_bcd(datetime->month));
+    finish();
     // set day(of week)
-    ds1302_write(0x8A);
-    ds1302_write(datetime->weekday);
-    ds1302_end_data_transfer();
+    write_byte(0x8A);
+    write_byte(datetime->weekday);
+    finish();
     // set year
-    ds1302_write(0x8C);
-    ds1302_write(ds1302_bin8_to_bcd(datetime->year));
-    ds1302_end_data_transfer();
-    // disable write protection
-    ds1302_write(0x8e);
-    ds1302_write(0x80);
-    ds1302_end_data_transfer();
+    write_byte(0x8C);
+    write_byte(bin8_to_bcd(datetime->year));
+    finish();
 }
 
 uint8_t ds1302_read_byte_from_ram(uint8_t offset)
 {
-    uint8_t tmp;
-    if (offset > 30)
-        return 0;
+    uint8_t value;
+
     // set address
-    ds1302_write(0xC1 + (2 * offset));
+    write_byte(0xC1 + (2 * offset));
     // read value
-    tmp = ds1302_read();
-    ds1302_end_data_transfer();
-    return tmp;
+    value = read_byte();
+    finish();
+
+    return value;
 }
 
-void ds1302_write_byte_to_ram(uint8_t offset, uint8_t value)
+void ds1302_write_byte_to_ram(uint8_t value, uint8_t offset)
 {
-    if (offset > 30)
-        return;
     // disable write protection
-    ds1302_write(0x8e);
-    ds1302_write(0x00);
-    ds1302_end_data_transfer();
+    write_byte(0x8e);
+    write_byte(0x00);
+    finish();
     // set address
-    ds1302_write(0xC0 + (2 * offset));
+    write_byte(0xC0 + (2 * offset));
     // write value
-    ds1302_write(value);
-    ds1302_end_data_transfer();
-    // disable write protection
-    ds1302_write(0x8e);
-    ds1302_write(0x80);
-    ds1302_end_data_transfer();
+    write_byte(value);
+    finish();
 }
 
-void ds1302_read_datetime_from_ram(uint8_t offset, datetime_t *datetime)
+void ds1302_read_datetime_from_ram(datetime_t *datetime, uint8_t offset)
 {
-    uint8_t _offset = offset;
-    datetime->sec = ds1302_read_byte_from_ram(_offset++);
-    datetime->min = ds1302_read_byte_from_ram(_offset++);
-    datetime->hour = ds1302_read_byte_from_ram(_offset++);
-    datetime->AMPM = ds1302_read_byte_from_ram(_offset++);
-    datetime->H12_24 = ds1302_read_byte_from_ram(_offset++);
-    datetime->weekday = ds1302_read_byte_from_ram(_offset++);
-    datetime->day = ds1302_read_byte_from_ram(_offset++);
-    datetime->month = ds1302_read_byte_from_ram(_offset++);
-    datetime->year = ds1302_read_byte_from_ram(_offset++);
+    datetime->sec = ds1302_read_byte_from_ram(offset++);
+    datetime->min = ds1302_read_byte_from_ram(offset++);
+    datetime->hour = ds1302_read_byte_from_ram(offset++);
+    datetime->AMPM = ds1302_read_byte_from_ram(offset++);
+    datetime->H12_24 = ds1302_read_byte_from_ram(offset++);
+    datetime->weekday = ds1302_read_byte_from_ram(offset++);
+    datetime->day = ds1302_read_byte_from_ram(offset++);
+    datetime->month = ds1302_read_byte_from_ram(offset++);
+    datetime->year = ds1302_read_byte_from_ram(offset++);
 }
 
-void ds1302_write_datetime_to_ram(uint8_t offset, datetime_t *datetime)
+void ds1302_write_datetime_to_ram(datetime_t *datetime, uint8_t offset)
 {
-    uint8_t _offset = offset;
-    ds1302_write_byte_to_ram(_offset++, datetime->sec);
-    ds1302_write_byte_to_ram(_offset++, datetime->min);
-    ds1302_write_byte_to_ram(_offset++, datetime->hour);
-    ds1302_write_byte_to_ram(_offset++, datetime->AMPM);
-    ds1302_write_byte_to_ram(_offset++, datetime->H12_24);
-    ds1302_write_byte_to_ram(_offset++, datetime->weekday);
-    ds1302_write_byte_to_ram(_offset++, datetime->day);
-    ds1302_write_byte_to_ram(_offset++, datetime->month);
-    ds1302_write_byte_to_ram(_offset++, datetime->year);
+    ds1302_write_byte_to_ram(datetime->sec, offset++);
+    ds1302_write_byte_to_ram(datetime->min, offset++);
+    ds1302_write_byte_to_ram(datetime->hour, offset++);
+    ds1302_write_byte_to_ram(datetime->AMPM, offset++);
+    ds1302_write_byte_to_ram(datetime->H12_24, offset++);
+    ds1302_write_byte_to_ram(datetime->weekday, offset++);
+    ds1302_write_byte_to_ram(datetime->day, offset++);
+    ds1302_write_byte_to_ram(datetime->month, offset++);
+    ds1302_write_byte_to_ram(datetime->year, offset++);
 }

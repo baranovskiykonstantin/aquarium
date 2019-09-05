@@ -3,49 +3,52 @@
  * Author: Baranovskiy Konstantin
  * Creation Date: 2017-02-06
  * Tabsize: 4
- * Copyright: (c) 2017 Baranovskiy Konstantin
+ * Copyright: (c) 2017-2019 Baranovskiy Konstantin
  * License: GNU GPL v3 (see License.txt)
- * This Revision: 1
  */
 
 #ifndef __PWM_H_INCLUDED__
 #define __PWM_H_INCLUDED__
 
 #include <avr/io.h>
-#include <avr/pgmspace.h>
 
-#define PWM_STEP 655 // 65535/100
+#define PWM_LEVEL_STEP 655 // 65535/100
 
-/* Initialize the PWM for controlling the light.
+/*
+ * Initialize the PWM for controlling the light.
  */
 extern void pwm_init(void);
 
-/* PWM status.
+/*
+ * Setup PWM.
+ * level - brightness level in percent.
+ * risetime - light rise time in minutes.
  */
-extern uint8_t pwm_get_status(void);
+extern void pwm_setup(uint8_t level, uint8_t risetime);
 
-/* PWM step up to top value.
+/*
+ * Turn on the light immediately.
  */
-extern void pwm_enable(void);
+extern void pwm_on(void);
 
-/* PWM step down to 0.
+/*
+ * Turn off the light immediately.
  */
-extern void pwm_disable(void);
+extern void pwm_off(void);
 
-/* Get PWM value in percentage.
+/*
+ * PWM steps up to light level.
  */
-extern uint8_t pwm_get_value(void);
+extern void pwm_rise(void);
 
-/* Get PWM value in percentage.
+/*
+ * PWM steps down to 0.
  */
-extern void pwm_set_value(uint8_t new_pwm_value);
+extern void pwm_fall(void);
 
-/* Get rise time in minutes 0-30.
+/*
+ * Get status of PWM activity.
  */
-extern uint8_t pwm_get_risetime(void);
-
-/* Set rise time in minutes 0-30.
- */
-extern void pwm_set_risetime(uint8_t new_rise_time);
+extern uint8_t pwm_status(void);
 
 #endif /* __PWM_H_INCLUDED__ */

@@ -1,4 +1,5 @@
 firmware/*.o
+firmware/tags
 aquarium.bak
 aquarium.xml
 power.bak

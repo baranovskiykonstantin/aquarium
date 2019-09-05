@@ -3,19 +3,16 @@
 # Author: Baranovskiy Konstantin
 # Creation Date: 2015-12-28
 # Tabsize: 4
-# Copyright: (c) 2015 Baranovskiy Konstantin
+# Copyright: (c) 2015-2019 Baranovskiy Konstantin
 # License: GNU GPL v3 (see License.txt)
-# This Revision: 1
 
 DEVICE  = atmega8
 F_CPU   = 8000000
 FUSE_L  = 0x24
 FUSE_H  = 0x97
-#AVRDUDE = avrdude -c usbasp -p $(DEVICE) -v
-#AVRDUDE = avrdude -c stk500v2 -P avrdoper -p $(DEVICE) -v
 AVRDUDE = avrdude -c pickit2 -p $(DEVICE) -v
 
-SOURCES = main.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c adc.c pwm.c
+SOURCES = main.c aquarium.c display.c ds18b20.c ds1302.c datetime.c uart.c crc8.c adc.c pwm.c
 CFLAGS  = -I. -DDEBUG_LEVEL=0
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 
@@ -37,7 +34,7 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 #        | | | |   + --------- EESAVE      ( EEPROM reserved )
 #        | | | +-------------- CKOPT       ( oscillator options disabled )
 #        | | +---------------- SPIEN       ( SPI programming enabled )
-#        | +------------------ WDTON       ( WDT disable )
+#        | +------------------ WDTON       ( WDT is initially enabled )
 #        +-------------------- RSTDISBL    ( external reset enabled )
 #
 ###############################################################################
@@ -45,27 +42,36 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 # symbolic targets:
 help:
 	@echo "This Makefile has no default rule. Use one of the following:"
-	@echo "make hex ....... to build main.hex"
-	@echo "make program ... to flash fuses and firmware"
+	@echo "make flash ..... to build flash.hex"
+	@echo "make eeprom .... to build eeprom.hex"
+	@echo "make program ... to flash the firmware"
 	@echo "make fuse ...... to flash the fuses"
-	@echo "make flash ..... to flash the firmware"
-	@echo "make clean ..... to delete objects and hex file"
-	@echo "make power ..... to turn power on"
+	@echo "make setup ..... to write the configuration data to eeprom"
+	@echo "make clean ..... to delete objects"
+	@echo "make poweron ... to turn power on"
+	@echo "make powerooff . to turn power off"
 
-power:
+poweron:
 	pk2cmd -pPIC16F73 -A5 -R -T
 
-hex: main.hex
+poweroff:
+	pk2cmd -pPIC16F73 -A5 -R
 
-program: flash fuse
+flash: flash.hex
+
+eeprom: eeprom.hex
+
+# rule for uploading firmware:
+program: flash.hex
+	$(AVRDUDE) -U flash:w:$<:i
 
 # rule for programming fuse bits:
 fuse:
 	$(AVRDUDE) -U hfuse:w:$(FUSE_H):m -U lfuse:w:$(FUSE_L):m
 
-# rule for uploading firmware:
-flash: main.hex
-	$(AVRDUDE) -U flash:w:main.hex:i
+# rule for uploading configuration data:
+setup: eeprom.hex
+	$(AVRDUDE) -U eeprom:w:$<:i
 
 # rule for deleting dependent files (those which can be built by Make):
 clean:
@@ -78,8 +84,13 @@ clean:
 main.elf: $(SOURCES:.c=.o)
 	$(COMPILE) -o main.elf $(SOURCES:.c=.o)
 
-main.hex: main.elf
-	rm -f main.hex main.eep.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size main.hex
+flash.hex: main.elf
+	rm -f flash.hex
+	avr-objcopy -j .text -j .data -O ihex $< $@
+	avr-size flash.hex
+
+eeprom.hex: main.elf
+	rm -f eeprom.hex
+	avr-objcopy -j .eeprom -O ihex --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 --no-change-warnings $< $@
+	avr-size eeprom.hex
 
