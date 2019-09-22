@@ -34,7 +34,7 @@
     * Touch Sensor 1 and Sensor 2 at the same time to switch the operation mode (on -> off -> auto -> on -> ...) of:
         * the lighting if the display shows the time;
         * the heater if the display shows the temperature;
-* [Aquarium-control app](https://github.com/baranovskiykonstantin/aquarium-control) is designed to setup the aquarium settings (Linux, Android)
+* [Aquarium-control app](https://github.com/baranovskiykonstantin/aquarium-control) is designed to setup the aquarium settings (Windows, Linux, Android)
 
 ## Wiring diagram
 ![wiring-diagram](https://raw.github.com/baranovskiykonstantin/aquarium/master/images/wiring-diagram.png)
@@ -58,7 +58,7 @@
    * Send command `AT+ORGL`
 * Set device name
    * Enter to AT-command mode
-   * Send command `AT+NAME=aquarium`
+   * Send command `AT+NAME=aquarium` (the device's name must begin with "aquarium" to be recognized by aquarium-control app)
 * Reduce power consumption (from ~40mA to ~3mA on idle!)
    * Enter to AT-command mode
    * Send command `AT+IPSCAN=1024,1,1024,1`
