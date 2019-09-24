@@ -1,32 +1,5 @@
-EESchema Schematic File Version 3
-LIBS:power
-LIBS:Выключатели_и_кнопки
-LIBS:Датчики
-LIBS:Диоды
-LIBS:Дроссели
-LIBS:Измерительные_приборы
-LIBS:Индикаторы
-LIBS:Конденсаторы
-LIBS:Микроконтроллеры
-LIBS:Операционные_усилители
-LIBS:Оптопары
-LIBS:Предохранители
-LIBS:Преобразователи
-LIBS:Прочее
-LIBS:Разъемы
-LIBS:Резисторы
-LIBS:Резонаторы
-LIBS:Реле
-LIBS:Стабилизаторы
-LIBS:Тиристоры
-LIBS:Транзисторы_биполярные
-LIBS:Транзисторы_полевые
-LIBS:Трансформаторы
-LIBS:Усилители_низкой_частоты
-LIBS:Часы
-LIBS:Электродвигатели
-LIBS:aquarium-cache
-EELAYER 26 0
+EESchema Schematic File Version 5
+EELAYER 30 0
 EELAYER END
 $Descr A3 11693 16535 portrait
 encoding utf-8
@@ -39,9 +12,14 @@ Comment1 ""
 Comment2 "Барановский К.В."
 Comment3 ""
 Comment4 ""
+Comment5 ""
+Comment6 ""
+Comment7 ""
+Comment8 ""
+Comment9 ""
 $EndDescr
 $Comp
-L ATMEGA8_EXT DD1
+L Микроконтроллеры:ATMEGA8_EXT DD1
 U 1 1 5677FF09
 P 7350 2650
 F 0 "DD1" H 7350 4851 138 0000 C CNN
@@ -52,7 +30,7 @@ F 3 "" H 7350 2900 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L CA56-21EWA HG1
+L Индикаторы:CA56-21EWA HG1
 U 1 1 5678038F
 P 975 10550
 F 0 "HG1" H 975 11900 138 0000 C CNN
@@ -63,7 +41,7 @@ F 3 "" H 450 11750 60  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L C C4
+L Конденсаторы:C C4
 U 1 1 56791A26
 P 9500 1150
 F 0 "C4" H 9678 1258 138 0000 L CNN
@@ -74,7 +52,7 @@ F 3 "" H 9500 1175 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L C C7
+L Конденсаторы:C C7
 U 1 1 56791A55
 P 10200 1150
 F 0 "C7" H 10378 1258 138 0000 L CNN
@@ -85,7 +63,7 @@ F 3 "" H 10200 1175 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L GND #PWR017
+L Питание:GND #PWR017
 U 1 1 56791BEA
 P 9500 1550
 F 0 "#PWR017" H 9900 1550 138 0001 C CNN
@@ -96,7 +74,7 @@ F 3 "" H 9500 1550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR019
+L Питание:GND #PWR019
 U 1 1 56791C0B
 P 10200 1550
 F 0 "#PWR019" H 10600 1550 138 0001 C CNN
@@ -107,7 +85,7 @@ F 3 "" H 10200 1550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR016
+L Питание:+5V #PWR016
 U 1 1 56791C40
 P 9500 750
 F 0 "#PWR016" H 10000 850 138 0001 C CNN
@@ -118,7 +96,7 @@ F 3 "" H 9500 950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR018
+L Питание:+5V #PWR018
 U 1 1 56791C61
 P 10200 750
 F 0 "#PWR018" H 10700 850 138 0001 C CNN
@@ -137,7 +115,7 @@ Wire Wire Line
 Wire Wire Line
 	10200 1300 10200 1550
 $Comp
-L +5V #PWR014
+L Питание:+5V #PWR014
 U 1 1 56791F4C
 P 8750 750
 F 0 "#PWR014" H 9250 850 138 0001 C CNN
@@ -148,7 +126,7 @@ F 3 "" H 8750 950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8750 750  8750 1650
+	8750 750  8750 950 
 Wire Wire Line
 	8750 1650 8550 1650
 Wire Wire Line
@@ -161,7 +139,7 @@ Wire Wire Line
 	8550 950  8750 950 
 Connection ~ 8750 950 
 $Comp
-L GND #PWR015
+L Питание:GND #PWR015
 U 1 1 567920EA
 P 8750 4550
 F 0 "#PWR015" H 9150 4550 138 0001 C CNN
@@ -174,7 +152,7 @@ $EndComp
 Wire Wire Line
 	8550 3800 8750 3800
 Wire Wire Line
-	8750 3800 8750 4550
+	8750 3800 8750 4000
 Wire Wire Line
 	8550 4000 8750 4000
 Connection ~ 8750 4000
@@ -182,7 +160,7 @@ Wire Wire Line
 	8550 4200 8750 4200
 Connection ~ 8750 4200
 $Comp
-L DS1302 DD4
+L Микроконтроллеры:DS1302 DD4
 U 1 1 567942BE
 P 7450 10350
 F 0 "DD4" H 7450 11351 138 0000 C CNN
@@ -193,7 +171,7 @@ F 3 "" H 7450 10200 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AT42QT1011 DD2
+L Преобразователи:AT42QT1011 DD2
 U 1 1 56794846
 P 7350 6100
 F 0 "DD2" H 7350 6851 138 0000 C CNN
@@ -204,7 +182,7 @@ F 3 "" H 7350 6000 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L C C1
+L Конденсаторы:C C1
 U 1 1 56795320
 P 5350 5850
 F 0 "C1" H 5528 5958 138 0000 L CNN
@@ -215,7 +193,7 @@ F 3 "" H 5350 5875 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR06
+L Питание:GND #PWR06
 U 1 1 56795326
 P 5350 6250
 F 0 "#PWR06" H 5750 6250 138 0001 C CNN
@@ -230,7 +208,7 @@ Wire Wire Line
 Wire Wire Line
 	5350 6000 5350 6250
 $Comp
-L C C9
+L Конденсаторы:C C9
 U 1 1 5679539A
 P 11100 10450
 F 0 "C9" H 11278 10558 138 0000 L CNN
@@ -241,7 +219,7 @@ F 3 "" H 11100 10475 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR024
+L Питание:GND #PWR024
 U 1 1 567953A0
 P 11100 11050
 F 0 "#PWR024" H 11500 11050 138 0001 C CNN
@@ -252,7 +230,7 @@ F 3 "" H 11100 11050 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR023
+L Питание:+5V #PWR023
 U 1 1 567953A6
 P 11100 10000
 F 0 "#PWR023" H 11600 10100 138 0001 C CNN
@@ -267,7 +245,7 @@ Wire Wire Line
 Wire Wire Line
 	11100 10600 11100 11050
 $Comp
-L QUARTZ ZQ1
+L Резонаторы:QUARTZ ZQ1
 U 1 1 5679596F
 P 9100 10450
 F 0 "ZQ1" V 9214 10294 138 0000 R CNN
@@ -291,7 +269,7 @@ Wire Wire Line
 Wire Wire Line
 	8700 10200 9100 10200
 $Comp
-L +5V #PWR011
+L Питание:+5V #PWR011
 U 1 1 56797DB1
 P 8700 9650
 F 0 "#PWR011" H 9200 9750 138 0001 C CNN
@@ -306,7 +284,7 @@ Wire Wire Line
 Wire Wire Line
 	8700 9850 8600 9850
 $Comp
-L C C5
+L Конденсаторы:C C5
 U 1 1 567982D7
 P 9600 6100
 F 0 "C5" H 9781 6214 138 0000 L CNN
@@ -317,7 +295,7 @@ F 3 "" H 9600 6125 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L GND #PWR012
+L Питание:GND #PWR012
 U 1 1 5679847B
 P 8700 11050
 F 0 "#PWR012" H 9100 11050 138 0001 C CNN
@@ -332,7 +310,7 @@ Wire Wire Line
 Wire Wire Line
 	8700 10850 8700 11050
 Wire Wire Line
-	8500 5850 9800 5850
+	8500 5850 9600 5850
 Wire Wire Line
 	9600 5850 9600 5950
 Wire Wire Line
@@ -344,7 +322,7 @@ Wire Wire Line
 Wire Wire Line
 	9600 6350 9600 6250
 $Comp
-L GND #PWR09
+L Питание:GND #PWR09
 U 1 1 56798CBF
 P 8600 6650
 F 0 "#PWR09" H 9000 6650 138 0001 C CNN
@@ -359,14 +337,14 @@ Wire Wire Line
 Wire Wire Line
 	8600 6350 8600 6650
 Wire Wire Line
-	6000 5350 6000 6150
+	6000 5350 6000 5850
 Wire Wire Line
 	6000 6150 6200 6150
 Wire Wire Line
 	6200 5850 6000 5850
 Connection ~ 6000 5850
 $Comp
-L R.125 R7
+L Резисторы:R.125 R7
 U 1 1 56799368
 P 10200 5850
 F 0 "R7" H 10200 6050 138 0000 C CNN
@@ -378,7 +356,7 @@ F 3 "" H 10200 5850 60  0000 C CNN
 $EndComp
 Connection ~ 9600 5850
 $Comp
-L Pin XP1
+L Разъемы:Pin XP1
 U 1 1 56799852
 P 10750 5850
 F 0 "XP1" H 10950 5600 138 0000 C CNN
@@ -391,7 +369,7 @@ $EndComp
 Wire Wire Line
 	10750 5850 10600 5850
 $Comp
-L DS18B20 DD5
+L Датчики:DS18B20 DD5
 U 1 1 567A4FD9
 P 7450 12750
 F 0 "DD5" H 7450 13550 138 0000 C CNN
@@ -402,7 +380,7 @@ F 3 "" H 7150 12700 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L GND #PWR08
+L Питание:GND #PWR08
 U 1 1 567A531F
 P 6400 13200
 F 0 "#PWR08" H 6800 13200 138 0001 C CNN
@@ -417,7 +395,7 @@ Wire Wire Line
 Wire Wire Line
 	6400 13050 6400 13200
 $Comp
-L R.125 R1
+L Резисторы:R.125 R1
 U 1 1 567AEBAB
 P 2000 12350
 F 0 "R1" V 2114 12244 138 0000 R CNN
@@ -428,7 +406,7 @@ F 3 "" H 2000 12350 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L R.125 R2
+L Резисторы:R.125 R2
 U 1 1 567AECE7
 P 2500 12350
 F 0 "R2" V 2614 12244 138 0000 R CNN
@@ -439,7 +417,7 @@ F 3 "" H 2500 12350 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L R.125 R3
+L Резисторы:R.125 R3
 U 1 1 567AED4C
 P 3000 12350
 F 0 "R3" V 3114 12244 138 0000 R CNN
@@ -450,7 +428,7 @@ F 3 "" H 3000 12350 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L R.125 R5
+L Резисторы:R.125 R5
 U 1 1 567AEDB4
 P 3500 12350
 F 0 "R5" V 3614 12244 138 0000 R CNN
@@ -461,7 +439,7 @@ F 3 "" H 3500 12350 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 Wire Wire Line
-	4300 12750 6600 12750
+	4300 12750 5700 12750
 Wire Wire Line
 	1750 11800 2000 11800
 Wire Wire Line
@@ -477,7 +455,7 @@ Wire Wire Line
 Wire Wire Line
 	3500 11200 3500 11950
 $Comp
-L PLS-4 XT1
+L Разъемы:PLS-4 XT1
 U 1 1 567BF5C5
 P 1000 1250
 F 0 "XT1" H 700 2200 138 0000 C CNN
@@ -502,7 +480,7 @@ GND
 Text Notes 450  1900 0    138  ~ 0
 UART
 $Comp
-L PLD-6 XT2
+L Разъемы:PLD-6 XT2
 U 1 1 567CF548
 P 1000 3350
 F 0 "XT2" H 700 4500 138 0000 C CNN
@@ -527,7 +505,7 @@ Text Notes 450  2925 0    98   ~ 0
 Text Notes 525  3325 0    98   ~ 0
 GND
 $Comp
-L GND #PWR02
+L Питание:GND #PWR02
 U 1 1 567D101C
 P 2000 6100
 F 0 "#PWR02" H 2400 6100 138 0001 C CNN
@@ -543,10 +521,6 @@ Wire Wire Line
 	2000 5600 2000 6100
 Entry Wire Line
 	4200 1050 4300 950 
-Wire Bus Line
-	4200 1050 4200 13450
-Wire Bus Line
-	11500 750  11500 5000
 Wire Wire Line
 	4300 950  6150 950 
 Entry Wire Line
@@ -854,7 +828,7 @@ LIGHT
 Text Label 4300 2150 0    100  ~ 0
 HEAT
 $Comp
-L 282844-2 XT4
+L Разъемы:282844-2 XT4
 U 1 1 567BE2AA
 P 1000 7200
 F 0 "XT4" H 950 7850 138 0000 C CNN
@@ -871,7 +845,7 @@ F0 "Power supply" 138
 F1 "power.sch" 100
 $EndSheet
 $Comp
-L GND #PWR020
+L Питание:GND #PWR020
 U 1 1 58491DD9
 P 10200 11050
 F 0 "#PWR020" H 10600 11050 138 0001 C CNN
@@ -888,7 +862,7 @@ Wire Wire Line
 Entry Wire Line
 	4300 10350 4200 10450
 $Comp
-L PLS-4 XT3
+L Разъемы:PLS-4 XT3
 U 1 1 584A6C54
 P 1000 5500
 F 0 "XT3" H 750 6450 138 0000 C CNN
@@ -911,7 +885,7 @@ POWER
 Wire Wire Line
 	2000 11800 2000 11950
 $Comp
-L +5V #PWR04
+L Питание:+5V #PWR04
 U 1 1 584B914C
 P 2650 4900
 F 0 "#PWR04" H 3150 5000 138 0001 C CNN
@@ -924,13 +898,13 @@ $EndComp
 Wire Wire Line
 	2650 4900 2650 5400
 Wire Wire Line
-	1800 5400 4100 5400
+	1800 5400 2650 5400
 Entry Wire Line
 	4200 11750 4300 11650
 Text Label 4300 11650 0    100  ~ 0
 TEMP_PWR
 $Comp
-L R.125 R6
+L Резисторы:R.125 R6
 U 1 1 567B8C4F
 P 5700 12200
 F 0 "R6" V 5800 12300 138 0000 L CNN
@@ -941,7 +915,7 @@ F 3 "" H 5700 12200 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 Wire Wire Line
-	4300 11650 8700 11650
+	4300 11650 5700 11650
 Wire Wire Line
 	6400 11650 6400 12450
 Wire Wire Line
@@ -953,7 +927,7 @@ Wire Wire Line
 	5700 12600 5700 12750
 Connection ~ 5700 12750
 $Comp
-L C C3
+L Конденсаторы:C C3
 U 1 1 584EFF11
 P 8700 12600
 F 0 "C3" H 8878 12708 138 0000 L CNN
@@ -964,7 +938,7 @@ F 3 "" H 8700 12625 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR013
+L Питание:GND #PWR013
 U 1 1 584EFF17
 P 8700 13200
 F 0 "#PWR013" H 9100 13200 138 0001 C CNN
@@ -980,7 +954,7 @@ Wire Wire Line
 	8700 11650 8700 12450
 Connection ~ 6400 11650
 $Comp
-L +12V #PWR01
+L Питание:+12V #PWR01
 U 1 1 58470EC2
 P 2000 4900
 F 0 "#PWR01" H 2500 5000 138 0001 C CNN
@@ -995,7 +969,7 @@ Wire Wire Line
 Wire Wire Line
 	2000 4900 2000 5200
 $Comp
-L +12V #PWR05
+L Питание:+12V #PWR05
 U 1 1 586A2E7C
 P 2650 6900
 F 0 "#PWR05" H 3150 7000 138 0001 C CNN
@@ -1010,7 +984,7 @@ Wire Wire Line
 Wire Wire Line
 	2650 7200 2650 6900
 $Comp
-L IRLD014 VT1
+L Транзисторы_полевые:IRLD014 VT1
 U 1 1 586A2E9F
 P 2000 8250
 F 0 "VT1" H 2450 8500 138 0000 L CNN
@@ -1025,7 +999,7 @@ Wire Wire Line
 Wire Wire Line
 	2000 7400 2000 7700
 $Comp
-L GND #PWR03
+L Питание:GND #PWR03
 U 1 1 586A3FC9
 P 2000 8700
 F 0 "#PWR03" H 2400 8700 138 0001 C CNN
@@ -1044,7 +1018,7 @@ Entry Wire Line
 Text Label 4100 8250 2    100  ~ 0
 LIGHT
 $Comp
-L R.125 R4
+L Резисторы:R.125 R4
 U 1 1 586A6820
 P 3150 8250
 F 0 "R4" H 3150 8450 138 0000 C CNN
@@ -1063,13 +1037,13 @@ Wire Wire Line
 Text Label 4300 2850 0    100  ~ 0
 TEMP_PWR
 Wire Wire Line
-	4300 5350 6000 5350
+	4300 5350 5350 5350
 Entry Wire Line
 	4300 5350 4200 5450
 Text Label 4300 5350 0    100  ~ 0
 SENS_PWR
 $Comp
-L AT42QT1011 DD3
+L Преобразователи:AT42QT1011 DD3
 U 1 1 586F73DC
 P 7350 8050
 F 0 "DD3" H 7350 8801 138 0000 C CNN
@@ -1080,7 +1054,7 @@ F 3 "" H 7350 7950 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L C C2
+L Конденсаторы:C C2
 U 1 1 586F73E2
 P 5350 7800
 F 0 "C2" H 5528 7908 138 0000 L CNN
@@ -1091,7 +1065,7 @@ F 3 "" H 5350 7825 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR07
+L Питание:GND #PWR07
 U 1 1 586F73E8
 P 5350 8200
 F 0 "#PWR07" H 5750 8200 138 0001 C CNN
@@ -1106,7 +1080,7 @@ Wire Wire Line
 Wire Wire Line
 	5350 7950 5350 8200
 $Comp
-L C C6
+L Конденсаторы:C C6
 U 1 1 586F73F6
 P 9600 8050
 F 0 "C6" H 9781 8164 138 0000 L CNN
@@ -1117,7 +1091,7 @@ F 3 "" H 9600 8075 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 Wire Wire Line
-	8500 7800 9800 7800
+	8500 7800 9600 7800
 Wire Wire Line
 	9600 7800 9600 7900
 Wire Wire Line
@@ -1129,7 +1103,7 @@ Wire Wire Line
 Wire Wire Line
 	9600 8300 9600 8200
 $Comp
-L GND #PWR010
+L Питание:GND #PWR010
 U 1 1 586F7403
 P 8600 8600
 F 0 "#PWR010" H 9000 8600 138 0001 C CNN
@@ -1144,14 +1118,14 @@ Wire Wire Line
 Wire Wire Line
 	8600 8300 8600 8600
 Wire Wire Line
-	6000 7300 6000 8100
+	6000 7300 6000 7800
 Wire Wire Line
 	6000 8100 6200 8100
 Wire Wire Line
 	6200 7800 6000 7800
 Connection ~ 6000 7800
 $Comp
-L R.125 R8
+L Резисторы:R.125 R8
 U 1 1 586F7410
 P 10200 7800
 F 0 "R8" H 10200 8000 138 0000 C CNN
@@ -1163,7 +1137,7 @@ F 3 "" H 10200 7800 60  0000 C CNN
 $EndComp
 Connection ~ 9600 7800
 $Comp
-L Pin XP2
+L Разъемы:Pin XP2
 U 1 1 586F7417
 P 10750 7800
 F 0 "XP2" H 10950 7550 138 0000 C CNN
@@ -1186,13 +1160,13 @@ Entry Wire Line
 Text Label 4300 8700 0    100  ~ 0
 SENS_2
 Wire Wire Line
-	4300 7300 6000 7300
+	4300 7300 5350 7300
 Entry Wire Line
 	4300 7300 4200 7400
 Text Label 4300 7300 0    100  ~ 0
 SENS_PWR
 $Comp
-L C C8
+L Конденсаторы:C C8
 U 1 1 586F79EE
 P 10800 1150
 F 0 "C8" H 10978 1258 138 0000 L CNN
@@ -1203,7 +1177,7 @@ F 3 "" H 10800 1175 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR021
+L Питание:GND #PWR021
 U 1 1 586F79F4
 P 10800 1550
 F 0 "#PWR021" H 11200 1550 138 0001 C CNN
@@ -1246,7 +1220,7 @@ SENS_2
 Text Label 4300 2650 0    100  ~ 0
 SENS_PWR
 $Comp
-L BAT GB1
+L Прочее:BAT GB1
 U 1 1 586E8F62
 P 10200 10450
 F 0 "GB1" H 10381 10565 138 0000 L CNN
@@ -1259,7 +1233,7 @@ $EndComp
 Connection ~ 5350 5350
 Connection ~ 5350 7300
 $Comp
-L R.125 R18
+L Резисторы:R.125 R18
 U 1 1 58978D6E
 P 5550 10350
 F 0 "R18" H 5550 10700 138 0000 C CNN
@@ -1276,4 +1250,38 @@ Entry Wire Line
 Connection ~ 2650 5400
 Text Label 4100 5400 2    100  ~ 0
 +5V
+Wire Wire Line
+	8750 1350 8750 1650
+Wire Wire Line
+	8750 1150 8750 1350
+Wire Wire Line
+	8750 950  8750 1150
+Wire Wire Line
+	8750 4000 8750 4200
+Wire Wire Line
+	8750 4200 8750 4550
+Wire Wire Line
+	6000 5850 6000 6150
+Wire Wire Line
+	9600 5850 9800 5850
+Wire Wire Line
+	5700 11650 6400 11650
+Wire Wire Line
+	5700 12750 6600 12750
+Wire Wire Line
+	6400 11650 8700 11650
+Wire Wire Line
+	6000 7800 6000 8100
+Wire Wire Line
+	9600 7800 9800 7800
+Wire Wire Line
+	5350 5350 6000 5350
+Wire Wire Line
+	5350 7300 6000 7300
+Wire Wire Line
+	2650 5400 4100 5400
+Wire Bus Line
+	11500 750  11500 5000
+Wire Bus Line
+	4200 1050 4200 13450
 $EndSCHEMATC

@@ -1,7 +1,7 @@
 firmware/*.o
 firmware/tags
-aquarium.bak
 aquarium.xml
-power.bak
-aquarium.kicad_pcb-bak
+*.bak
+*.sch-bak
+*.kicad_pcb-bak
 *.elf

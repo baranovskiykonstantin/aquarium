@@ -1,4 +1,4 @@
-update=Fri 06 Jan 2017 16:52:46 EET
+update=Вт 24 сен 2019 18:21:29
 version=1
 last_client=kicad
 [cvpcb]
@@ -6,36 +6,6 @@ version=1
 NetIExt=net
 [general]
 version=1
-[eeschema]
-version=1
-LibDir=/home/baranovskiykonstantin/common/apps/kicad/symbols
-[eeschema/libraries]
-LibName1=power
-LibName2=Выключатели_и_кнопки
-LibName3=Датчики
-LibName4=Диоды
-LibName5=Дроссели
-LibName6=Измерительные_приборы
-LibName7=Индикаторы
-LibName8=Конденсаторы
-LibName9=Микроконтроллеры
-LibName10=Операционные_усилители
-LibName11=Оптопары
-LibName12=Предохранители
-LibName13=Преобразователи
-LibName14=Прочее
-LibName15=Разъемы
-LibName16=Резисторы
-LibName17=Резонаторы
-LibName18=Реле
-LibName19=Стабилизаторы
-LibName20=Тиристоры
-LibName21=Транзисторы_биполярные
-LibName22=Транзисторы_полевые
-LibName23=Трансформаторы
-LibName24=Усилители_низкой_частоты
-LibName25=Часы
-LibName26=Электродвигатели
 [schematic_editor]
 version=1
 PageLayoutDescrFile=empty.kicad_wks
@@ -65,3 +35,6 @@ SolderMaskMinWidth=0
 DrawSegmentWidth=0.2
 BoardOutlineThickness=0.15
 ModuleOutlineThickness=0.15
+[eeschema]
+version=1
+LibDir=
