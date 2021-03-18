@@ -83,7 +83,7 @@ Format:
 Response:
 
 ```
-Date: 01.01.2017 Friday
+Date: 01.01.17 Friday
 Time: 13:29:59 (-3 sec at 12:00:00)
 Temp: 22
 Heat: OFF auto (20-22)
