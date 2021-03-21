@@ -34,7 +34,7 @@
     * Touch Sensor 1 and Sensor 2 at the same time to switch the operation mode (on -> off -> auto -> on -> ...) of:
         * the lighting if the display shows the time;
         * the heater if the display shows the temperature;
-* [Aquarium-control app](https://github.com/baranovskiykonstantin/aquarium-control) is designed to setup the aquarium settings (Windows, Linux, Android)
+* [Aquarium-control app](https://github.com/baranovskiykonstantin/aquarium-control) is designed to setup the aquarium settings (Windows, Linux, Android, [Symbian](https://github.com/baranovskiykonstantin/AquariumControlS60))
 
 ## Wiring diagram
 ![wiring-diagram](https://raw.github.com/baranovskiykonstantin/aquarium/master/images/wiring-diagram.png)
